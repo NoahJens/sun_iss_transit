@@ -38,7 +38,7 @@ def find_transit(observer, iss, sun, times):
                 candidate_times.append(t)
 
 
-    print(f"ISS EPOCH: {convert_t(iss_geo.epoch)}\n")
+    # print(f"ISS EPOCH: {convert_t(iss_geo.epoch)}\n")
     print(f"{'TIME':<25} {'SEPARATION [deg]':<18} {'SUN ALT [deg]':<10}")
 
     fine_candidates = []
