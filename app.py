@@ -6,8 +6,14 @@ from transit import find_transit
 # Define observation point
 observer = earth + wgs84.latlon(53.788419, 9.569346) # Sommerland 
 
-st.title("Sun and ISS Transit Calculator")
+st.title("Sun - ISS Transit Calculator")
+st.write('ISS orbit data from:', epoch)
+st.write('Calculations for 53.79 N, 9.56 E')
 
-st.write(epoch)
+status_placeholder = st.empty()
+status_placeholder.text("Calculating transit... please wait.")
+
 transit = find_transit(observer, sun, iss) 
+status_placeholder.empty()
+
 st.dataframe(transit)

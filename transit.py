@@ -54,7 +54,7 @@ def find_transit(observer, sun, iss):
         pairs = []
         for t in times_fine:
             separation, sun_alt = angular_separation(t, observer, sun, iss)
-            if separation <= 3:
+            if separation <= 2:
                 pairs.append((t, separation, sun_alt))
 
         if pairs:
