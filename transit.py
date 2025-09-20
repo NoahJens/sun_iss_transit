@@ -1,14 +1,14 @@
 from utils import convert_t, angular_separation
 import numpy as np 
 from astro_data import ts 
+import pandas as pd 
 
-
-def find_transit(observer, iss, sun, times):
+def find_transit(observer, sun, iss):
     # Start time as Skyfield time (not datetime!)
     start_date = ts.now()
-    print("Start date:", convert_t(start_date))
+    # print("Start date:", convert_t(start_date))
 
-    days_to_scan = 10
+    days_to_scan = 30
     threshold_deg = 10  # Sun angular diameter ~0.5 deg
     candidate_times = []
 
@@ -30,39 +30,36 @@ def find_transit(observer, iss, sun, times):
         # Vectorized angular separation check
         for t in times: 
             # print(t.utc_datetime().strftime("%Y-%m-%d %H:%M:%S %Z"))
-            separation, sun_alt = angular_separation(t)
+            separation, sun_alt = angular_separation(t, observer, sun, iss)
             # print(sun_alt)
 
             if separation <= threshold_deg and sun_alt > 10:
-                print(f'{t.utc_datetime()}\t{sun_alt:.2f}\t{separation:.2f}')
+                # print(f'{t.utc_datetime()}\t{sun_alt:.2f}\t{separation:.2f}')
                 candidate_times.append(t)
 
-
     # print(f"ISS EPOCH: {convert_t(iss_geo.epoch)}\n")
-    print(f"{'TIME':<25} {'SEPARATION [deg]':<18} {'SUN ALT [deg]':<10}")
-
-    fine_candidates = []
+    # print(f"{'TIME':<25} {'SEPARATION [deg]':<18} {'SUN ALT [deg]':<10}")
 
     window_minutes = 2
     offset_minutes= window_minutes / (24 * 60)
 
-    for cand in candidate_times:  # cand is a Skyfield Time object
+    records = []
+
+    for cand in candidate_times:
         start_fine = cand - offset_minutes
-        end_fine   = cand + offset_minutes
-
         fine_seconds = np.arange(0, (2 * window_minutes * 60) + 1, 1)
-        fine_offsets = fine_seconds / 86400.0  # seconds -> days
-        times_fine = start_fine + fine_offsets  # Skyfield Time array
+        fine_offsets = fine_seconds / 86400.0
+        times_fine = start_fine + fine_offsets
 
-        separations = []
+        pairs = []
         for t in times_fine:
-            separation, sun_alt = angular_separation(t)
-            if separation <= 2:
-                separations.append(separation)
+            separation, sun_alt = angular_separation(t, observer, sun, iss)
+            if separation <= 3:
+                pairs.append((t, separation, sun_alt))
 
-        if len(separations) > 0:
-            min_idx = np.argmin(separations)
-            best_time = times_fine[min_idx]
-            min_sep   = separations[min_idx]
-            print(f"{best_time.utc_iso():<25} {min_sep:<18.4f} {sun_alt:<10.4f}")
-    return 
+        if pairs:
+            best_time, min_sep, min_alt = min(pairs, key=lambda x: x[1])
+            records.append((convert_t(best_time), min_sep, min_alt))
+
+    df = pd.DataFrame(records, columns=["Time CEST", "Separation [deg]", "Sun altitude [deg]"])
+    return df
