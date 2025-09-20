@@ -5,7 +5,7 @@
 numpy==2.0.1
 pandas==2.3.2
 pip==25.2
-# python==3.12.9
+python==3.12.9
 pytz==2025.2
 skyfield==1.53
 streamlit==1.49.1
