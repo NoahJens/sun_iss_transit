@@ -26,3 +26,11 @@ def convert_t(t):
 
     t_berlin = t_utc.astimezone(pytz.timezone('Europe/Berlin'))
     return t_berlin.strftime("%Y-%m-%d %H:%M:%S %Z")
+
+# Check number of decimal places
+def decimal_places(value):
+    s = str(value)
+    if '.' in s:
+        return len(s.split('.')[-1])
+    else:
+        return 0
