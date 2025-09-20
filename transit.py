@@ -8,7 +8,7 @@ def find_transit(observer, sun, iss):
     start_date = ts.now()
     # print("Start date:", convert_t(start_date))
 
-    days_to_scan = 30
+    days_to_scan = 14
     coarse_threshold_deg = 10  # Sun angular diameter ~0.5 deg
     candidate_times = []
 
@@ -40,7 +40,7 @@ def find_transit(observer, sun, iss):
     window_minutes = 2
     offset_minutes= window_minutes / (24 * 60)
     fine_threshold_deg = 2
-    
+
     records = []
 
     for cand in candidate_times:
