@@ -9,7 +9,7 @@ def find_transit(observer, sun, iss):
     # print("Start date:", convert_t(start_date))
 
     days_to_scan = 30
-    threshold_deg = 10  # Sun angular diameter ~0.5 deg
+    coarse_threshold_deg = 10  # Sun angular diameter ~0.5 deg
     candidate_times = []
 
     minutes_per_step = 4  # every 5 minutes
@@ -33,16 +33,14 @@ def find_transit(observer, sun, iss):
             separation, sun_alt = angular_separation(t, observer, sun, iss)
             # print(sun_alt)
 
-            if separation <= threshold_deg and sun_alt > 10:
+            if separation <= coarse_threshold_deg and sun_alt > 10:
                 # print(f'{t.utc_datetime()}\t{sun_alt:.2f}\t{separation:.2f}')
                 candidate_times.append(t)
 
-    # print(f"ISS EPOCH: {convert_t(iss_geo.epoch)}\n")
-    # print(f"{'TIME':<25} {'SEPARATION [deg]':<18} {'SUN ALT [deg]':<10}")
-
     window_minutes = 2
     offset_minutes= window_minutes / (24 * 60)
-
+    fine_threshold_deg = 2
+    
     records = []
 
     for cand in candidate_times:
@@ -54,7 +52,7 @@ def find_transit(observer, sun, iss):
         pairs = []
         for t in times_fine:
             separation, sun_alt = angular_separation(t, observer, sun, iss)
-            if separation <= 2:
+            if separation <= fine_threshold_deg:
                 pairs.append((t, separation, sun_alt))
 
         if pairs:
