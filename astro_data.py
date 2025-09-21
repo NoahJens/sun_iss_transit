@@ -8,7 +8,7 @@ planets = load('de421.bsp')
 earth, sun = planets['earth'], planets['sun']
 
 # Load ISS position data from CelesTrak
-max_days = 3    # download again once 7 days old
+max_days = 3    # download again once 3 days old
 name = 'ISS.csv'  # custom filename, not 'gp.php'
 
 base = 'https://celestrak.org/NORAD/elements/gp.php'
