@@ -1,6 +1,6 @@
 import streamlit as st
 from skyfield.api import wgs84
-from astro_data import earth, sun, iss, epoch 
+from astro_data import earth, sun, load_iss_data
 from transit import find_transit 
 from utils import decimal_places
 
@@ -8,7 +8,16 @@ from utils import decimal_places
 # observer = earth + wgs84.latlon(53.788419, 9.569346) # Sommerland 
 
 st.title("Sun - ISS Transit Calculator")
-        
+
+if "iss" not in st.session_state or "epoch" not in st.session_state:
+    iss, epoch = load_iss_data(override=False)
+    st.session_state.iss = iss
+    st.session_state.epoch = epoch
+
+# Use cached values
+iss = st.session_state.iss
+epoch = st.session_state.epoch
+
 st.write('ISS orbit data from:', epoch)
 st.write('Apparent diameter of sun approx. 0.5 degree')
 
@@ -16,6 +25,12 @@ st.write('Apparent diameter of sun approx. 0.5 degree')
 lat_str = st.text_input("Latitude (decimal degrees)", value="53.7985")
 lon_str = st.text_input("Longitude (decimal degrees)", value="9.5470")
 
+if st.button("Update ISS orbit data"):
+    override = True
+    iss, epoch = load_iss_data(override)
+    st.session_state.iss = iss
+    st.session_state.epoch = epoch
+    
 # Button to update the observer
 if st.button("Run"):
     try:
