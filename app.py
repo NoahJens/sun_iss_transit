@@ -27,7 +27,7 @@ if st.button("Run"):
         lon = float(lon_str)
         observer = earth + wgs84.latlon(lat, lon)
 
-        st.success(f"Coordinates updated: {lat} N, {lon} E")
+        # st.success(f"Coordinates updated: {lat} N, {lon} E")
         st.warning('Transit times will only be reliable up to a couple of days in advance')
         
         status_placeholder = st.empty()
