@@ -11,6 +11,7 @@ st.title("Sun - ISS Transit Calculator")
 
 if "iss" not in st.session_state or "epoch" not in st.session_state:
     iss, epoch = load_iss_data(override=False)
+    print('testX')
     st.session_state.iss = iss
     st.session_state.epoch = epoch
 
@@ -30,6 +31,8 @@ if st.button("Update ISS orbit data"):
     iss, epoch = load_iss_data(override)
     st.session_state.iss = iss
     st.session_state.epoch = epoch
+    print(epoch)
+    st.success(f"ISS orbit data has been up to date ({epoch})")
     
 # Button to update the observer
 if st.button("Run"):
@@ -42,7 +45,7 @@ if st.button("Run"):
         lon = float(lon_str)
         observer = earth + wgs84.latlon(lat, lon)
 
-        st.success(f"Coordinates updated: {lat} N, {lon} E")
+        # st.success(f"Coordinates updated: {lat} N, {lon} E")
         st.warning('Transit times will only be reliable up to a couple of days in advance')
         
         status_placeholder = st.empty()

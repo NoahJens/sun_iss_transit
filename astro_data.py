@@ -15,10 +15,10 @@ name = 'ISS.csv'  # custom filename, not 'gp.php'
 print("test outside") 
 base = 'https://celestrak.org/NORAD/elements/gp.php'
 url = base + '?GROUP=stations&FORMAT=json'
-print(load.days_old(name))
+
 def load_iss_data(override):
     try:
-        if not load.exists(name) or load.days_old(name) >= max_days or override == True and load.days_old(name) >= 1:
+        if not load.exists(name) or load.days_old(name) >= max_days or override == True and load.days_old(name) >= .2:
             print("pre download")
             status_placeholder = st.empty()
             status_placeholder.markdown(
@@ -27,7 +27,6 @@ def load_iss_data(override):
             )
             load.download(url, filename=name)
             status_placeholder.empty()
-            st.success(f"ISS orbit data has been updated at {epoch}")
             print("Updated ISS position")
 
     except (HTTPError, URLError, OSError) as e:
@@ -39,7 +38,7 @@ def load_iss_data(override):
     # Load ISS position
     with load.open('ISS.csv', mode='r') as f:
         data = json.load(f) 
-
+    print(load.days_old(name))
     # Find the ISS row (using NORAD ID is safest)
     iss_row = next(row for row in data if row.get("NORAD_CAT_ID") == 25544)
 
