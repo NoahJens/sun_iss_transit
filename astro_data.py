@@ -10,7 +10,7 @@ planets = load('de421.bsp')
 earth, sun = planets['earth'], planets['sun']
 
 # Load ISS position data from CelesTrak
-max_days = 7    # download again once 7 days old
+max_days = .1    # download again once 7 days old
 name = 'ISS.csv'  # custom filename, not 'gp.php'
 print("test outside") 
 base = 'https://celestrak.org/NORAD/elements/gp.php'
@@ -18,7 +18,7 @@ url = base + '?GROUP=stations&FORMAT=json'
 
 def load_iss_data(override):
     try:
-        if not load.exists(name) or load.days_old(name) >= max_days or override == True and load.days_old(name) >= .2:
+        if load.days_old(name) >= max_days: #or override == True and load.days_old(name) >= .1:
             print("pre download")
             status_placeholder = st.empty()
             status_placeholder.markdown(

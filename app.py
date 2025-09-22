@@ -20,20 +20,20 @@ iss = st.session_state.iss
 epoch = st.session_state.epoch
 
 st.write('ISS orbit data from:', epoch)
+
+# if st.button("Update ISS orbit data"):
+#     override = True
+#     iss, epoch = load_iss_data(override)
+#     st.session_state.iss = iss
+#     st.session_state.epoch = epoch
+#     print(epoch)
+#     st.success(f"ISS orbit data is up to date ({epoch})")
+    
 st.write('Apparent diameter of sun approx. 0.5 degree')
 
 # Input fields for latitude and longitude
 lat_str = st.text_input("Latitude (decimal degrees)", value="53.7985")
 lon_str = st.text_input("Longitude (decimal degrees)", value="9.5470")
-
-if st.button("Update ISS orbit data"):
-    override = True
-    iss, epoch = load_iss_data(override)
-    st.session_state.iss = iss
-    st.session_state.epoch = epoch
-    print(epoch)
-    st.success(f"ISS orbit data has been up to date ({epoch})")
-    
 # Button to update the observer
 if st.button("Run"):
     try:
@@ -50,7 +50,7 @@ if st.button("Run"):
         
         status_placeholder = st.empty()
         status_placeholder.markdown(
-            "<span style='color:red'>Calculating (near-)transit events for the next 30 days... please wait.</span>",
+            "<span style='color:red'>Calculating (near-) transit events for the next 7 days... please wait.</span>",
             unsafe_allow_html=True
         )
 
