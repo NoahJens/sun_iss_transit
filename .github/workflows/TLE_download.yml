@@ -30,4 +30,4 @@ jobs:
           git add ISS.csv
           git commit -m 'Update TLE file'
           git pull
-          git push
+          git push -f origin main
