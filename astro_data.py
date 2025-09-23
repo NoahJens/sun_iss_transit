@@ -33,7 +33,8 @@ def load_iss_data(override):
     except (HTTPError, URLError, OSError) as e:
         print("couldnt update")
         st.error(f"⚠️ Could not update TLE ({e})")
-        return 
+        return False, False
+    
     print("load_iss_data")
     # Load ISS position
     with load.open('ISS.csv', mode='r') as f:
