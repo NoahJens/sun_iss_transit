@@ -17,13 +17,13 @@ jobs:
         with:
           python-version: "3.12"  # or whichever version you need
 
+      - name: Checkout repo
+        uses: actions/checkout@v3
+
       - name: Install dependencies
         run: |
           python -m pip install --upgrade pip
           pip install -r requirements.txt
-
-      - name: Checkout repo
-        uses: actions/checkout@v3
 
       - name: Send email
         run: python email.py
