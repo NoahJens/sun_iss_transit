@@ -3,6 +3,7 @@ from utils import convert_t
 from urllib.error import URLError, HTTPError
 import streamlit as st
 import json
+import os 
 
 ts = load.timescale()
 
@@ -18,7 +19,7 @@ url = base + '?GROUP=stations&FORMAT=json'
 
 def load_iss_data(override):
     try:
-        if load.days_old(name) >= max_days: #or override == True and load.days_old(name) >= .1:
+        if os.path.isfile("/ISS.csv") == False or load.days_old(name) >= max_days: #or override == True and load.days_old(name) >= .1:
             print("pre download")
             status_placeholder = st.empty()
             status_placeholder.markdown(
