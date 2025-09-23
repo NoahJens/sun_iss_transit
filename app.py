@@ -1,6 +1,6 @@
 import streamlit as st
 from skyfield.api import wgs84
-from .astro_data import earth, sun, load_iss_data
+from astro_data import earth, sun, load_iss_data
 from transit import find_transit 
 from utils import decimal_places
 
