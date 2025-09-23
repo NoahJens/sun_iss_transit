@@ -12,7 +12,7 @@ import os
 
 # Calculate transits 
 iss, epoch = load_iss_data()
-observer = earth + wgs84.latlon(53.7985, 9.5470)
+observer = earth + wgs84.latlon(52.5333, 14.3565)#(53.7985, 9.5470)
 transit = find_transit(observer, sun, iss)
 transit.to_csv("transits.csv", index=False)
 
