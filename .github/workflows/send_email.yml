@@ -1,0 +1,23 @@
+name: Send email
+on:
+  schedule:
+    - cron: "0 7 */3 * *"  # Every 3 days at 07:00 UTC
+  workflow_dispatch:       # allow manual trigger from GitHub UI
+
+permissions:
+  contents: write
+
+jobs:
+  send_email:
+      runs-on: ubuntu-latest
+      needs: update_iss  # only run after update_iss
+      steps:
+        - name: Checkout repo
+          uses: actions/checkout@v3
+
+        - name: Send email
+          run: python email.py
+          env:
+            EMAIL_USER: ${{ secrets.EMAIL_USER }}
+            EMAIL_PASSWORD: ${{ secrets.EMAIL_PASSWORD }}
+            EMAIL_TO: ${{ secrets.EMAIL_TO }}
