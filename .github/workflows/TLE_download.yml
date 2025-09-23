@@ -1,8 +1,7 @@
-name: TLE download
-
+name: TLE download and email
 on:
   schedule:
-    - cron: "0 9 * * *"   # run every day at 09:00 UTC
+    - cron: "0 7 * * *"   # run every day at 09:00 UTC
   workflow_dispatch:       # allow manual trigger from GitHub UI
 
 permissions:
@@ -31,3 +30,17 @@ jobs:
           git commit -m 'Update TLE file'
           git pull
           git push -f origin main
+
+  send_email:
+    runs-on: ubuntu-latest
+    needs: update_iss  # only run after update_iss
+    steps:
+      - name: Checkout repo
+        uses: actions/checkout@v3
+
+      - name: Send email
+        run: python email.py
+        env:
+          EMAIL_USER: ${{ secrets.EMAIL_USER }}
+          EMAIL_PASSWORD: ${{ secrets.EMAIL_PASSWORD }}
+          EMAIL_TO: ${{ secrets.EMAIL_TO }}

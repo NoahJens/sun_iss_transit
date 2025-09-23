@@ -18,7 +18,6 @@ print("test outside")
 # url = base + '?GROUP=stations&FORMAT=json'
 
 def load_iss_data():
-
     with load.open('ISS.csv', mode='r') as f:
         data = json.load(f) 
 

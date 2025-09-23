@@ -9,15 +9,7 @@ from utils import decimal_places
 
 st.title("Sun - ISS Transit Calculator")
 
-if "iss" not in st.session_state or "epoch" not in st.session_state:
-    iss, epoch = load_iss_data()
-    print('testX')
-    st.session_state.iss = iss
-    st.session_state.epoch = epoch
-
-# Use cached values
-iss = st.session_state.iss
-epoch = st.session_state.epoch
+iss, epoch = load_iss_data()
 
 st.write(f'ISS orbit data from {epoch}')
 
