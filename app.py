@@ -10,10 +10,8 @@ from utils import decimal_places
 st.title("Sun - ISS Transit Calculator")
 
 if "iss" not in st.session_state or "epoch" not in st.session_state:
-    iss, epoch = load_iss_data(override=False)
+    iss, epoch = load_iss_data()
     print('testX')
-    if iss == False: 
-        exit
     st.session_state.iss = iss
     st.session_state.epoch = epoch
 
@@ -23,14 +21,6 @@ epoch = st.session_state.epoch
 
 st.write(f'ISS orbit data from {epoch}')
 
-# if st.button("Update ISS orbit data"):
-#     override = True
-#     iss, epoch = load_iss_data(override)
-#     st.session_state.iss = iss
-#     st.session_state.epoch = epoch
-#     print(epoch)
-#     st.success(f"ISS orbit data is up to date ({epoch})")
-    
 st.text('Apparent diameter of sun approx. 0.5 degrees')
 st.subheader('Coordinates')
 # Input fields for latitude and longitude
