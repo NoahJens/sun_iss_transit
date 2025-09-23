@@ -58,6 +58,6 @@ def find_transit(observer, sun, iss):
         if pairs:
             best_time, min_sep, min_alt = min(pairs, key=lambda x: x[1])
             records.append((convert_t(best_time), min_sep, min_alt))
-
+ 
     df = pd.DataFrame(records, columns=["Time CEST", "Separation [deg]", "Sun altitude [deg]"])
     return df

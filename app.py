@@ -46,7 +46,7 @@ if st.button("Run"):
         observer = earth + wgs84.latlon(lat, lon)
 
         # st.success(f"Coordinates updated: {lat} N, {lon} E")
-        st.warning('Transit times will only be reliable up to a couple of days in advance')
+        st.warning('Transit times will only be reliable up to about a day in advance')
         
         status_placeholder = st.empty()
         status_placeholder.markdown(
@@ -55,9 +55,12 @@ if st.button("Run"):
         )
 
         transit = find_transit(observer, sun, iss)
-        
         status_placeholder.empty()
-        st.dataframe(transit)
+
+        if transit.empty: 
+            st.error("No (near-) transit events found in the upcoming 7 days")
+        else:
+            st.dataframe(transit)
         
     except ValueError as e:
         st.error(str(e))
