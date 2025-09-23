@@ -41,7 +41,7 @@ if not transit.empty:
 
     # Send
     with smtplib.SMTP_SSL("smtp.gmail.com", 465) as server:
-        server.login(os.environ["EMAIL_USER"], os.environ["EMAIL_PASSWORD"])
+        server.login(os.environ["EMAIL_FROM"], os.environ["EMAIL_PASSWORD"])
         server.send_message(msg)
 
 else:
