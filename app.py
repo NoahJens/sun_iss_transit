@@ -19,7 +19,7 @@ if "iss" not in st.session_state or "epoch" not in st.session_state:
 iss = st.session_state.iss
 epoch = st.session_state.epoch
 
-st.write('ISS orbit data from:', epoch)
+st.write(f'ISS orbit data from {epoch}')
 
 # if st.button("Update ISS orbit data"):
 #     override = True
@@ -29,11 +29,11 @@ st.write('ISS orbit data from:', epoch)
 #     print(epoch)
 #     st.success(f"ISS orbit data is up to date ({epoch})")
     
-st.write('Apparent diameter of sun approx. 0.5 degree')
-
+st.text('Apparent diameter of sun approx. 0.5 degrees')
+st.subheader('Coordinates')
 # Input fields for latitude and longitude
-lat_str = st.text_input("Latitude (decimal degrees)", value="53.7985")
-lon_str = st.text_input("Longitude (decimal degrees)", value="9.5470")
+lat_str = st.text_input("Latitude [decimal degrees]", value="53.7985")
+lon_str = st.text_input("Longitude [decimal degrees]", value="9.5470")
 # Button to update the observer
 if st.button("Run"):
     try:
