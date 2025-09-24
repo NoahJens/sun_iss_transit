@@ -17,7 +17,7 @@ jobs:
         with:
           persist-credentials: true   # allows push with GITHUB_TOKEN
           fetch-depth: 0              # fetch full history (needed for push)
-
+      
       - name: Fetch ISS data
         run: |
           curl -s "https://celestrak.org/NORAD/elements/gp.php?GROUP=stations&FORMAT=json" -o ISS.csv
@@ -35,5 +35,5 @@ jobs:
             git pull --rebase origin main
             git push -f origin main
           else
-            echo "ISS.csv unchanged — skipping commit and push"
+            echo "ISS.csv unchanged — skipping commit and push."
           fi
