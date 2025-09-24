@@ -28,8 +28,8 @@ if st.button("Update ISS orbit data"):
     iss, epoch = load_iss_data(override)
     st.session_state.iss = iss
     st.session_state.epoch = epoch
-    print(epoch)
-    st.success(f"ISS orbit data is up to date ({epoch})")
+    if not iss == False:
+        st.success(f"ISS orbit data is up to date ({epoch})")
     
 
 st.text('Apparent diameter of sun approx. 0.5 degrees')
