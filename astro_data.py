@@ -42,7 +42,7 @@ def load_iss_data(override):
                 age_days = (datetime.now(timezone.utc) - completed_dt).total_seconds() / 86400
 
             # Trigger workflow if no run exists or last run is too old
-            if not runs or age_days >= 0.1:  # 0.1 days ≈ 2.4 hours
+            if not runs or age_days >= 0.0001:  # 0.1 days ≈ 2.4 hours
                 print("pre download")
                 status_placeholder = st.empty()
                 status_placeholder.markdown(
