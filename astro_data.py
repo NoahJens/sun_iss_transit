@@ -48,6 +48,7 @@ def load_iss_data(override):
     r = requests.get(url)
     data = json.loads(r.text)  # data now contains the latest ISS info
 
+    print(load.days_old(name))
     # with load.open('ISS.csv', mode='r') as f:
     #     data = json.load(f) 
 
