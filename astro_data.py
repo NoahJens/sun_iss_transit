@@ -19,7 +19,7 @@ name = 'ISS.csv'  # custom filename, not 'gp.php'
 def load_iss_data(override):
     try:    
         # check if ISS.csv is missing or override is True
-        if not os.path.isfile("ISS.csv") or (override and load.days_old(name) >= 0.1):
+        if not os.path.isfile("ISS.csv") or (override and load.days_old(name) >= 0.0001):
             print("pre download")
             status_placeholder = st.empty()
             status_placeholder.markdown(
