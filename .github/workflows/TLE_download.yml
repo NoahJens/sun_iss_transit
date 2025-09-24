@@ -1,7 +1,7 @@
 name: TLE download
 on:
-  schedule:
-    - cron: "0 7 * * *"   # run every day at 09:00 UTC
+  # schedule:
+  #   - cron: "0 7 * * *"   # run every day at 09:00 UTC
   workflow_dispatch:       # allow manual trigger from GitHub UI
 
 permissions:
@@ -35,5 +35,5 @@ jobs:
             git pull --rebase origin main
             git push -f origin main
           else
-            echo "ISS.csv unchanged — skipping commit and push."
+            echo "ISS.csv unchanged — skipping commit and push"
           fi
