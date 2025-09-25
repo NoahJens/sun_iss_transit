@@ -20,6 +20,7 @@ import json
 from datetime import datetime, timezone
 
 def load_iss_data(override):
+    success = None 
     try:
         # Check last workflow run instead of commit date
         if override:
@@ -35,22 +36,26 @@ def load_iss_data(override):
             runs = r.json().get("workflow_runs", [])
             
             age_days = None
+            success = False 
+
             if runs:
                 last_run = runs[0]
+                print(f"last run: {last_run["id"]}")
                 completed_at = last_run.get("updated_at") or last_run.get("created_at")
                 completed_dt = datetime.fromisoformat(completed_at.replace("Z", "+00:00"))
                 age_days = (datetime.now(timezone.utc) - completed_dt).total_seconds() / 86400
+                print(f"age days: {age_days}")
 
             # Trigger workflow if no run exists or last run is too old
             if not runs or age_days >= 0.0001:  # 0.1 days ≈ 2.4 hours
-                print("pre download")
                 status_placeholder = st.empty()
                 status_placeholder.markdown(
-                    "<span style='color:red'>Updating ISS orbit data... please wait.</span>",
+                    "<span style='color:red'>Updating ISS orbit data... please wait</span>",
                     unsafe_allow_html=True
                 )
 
                 # Trigger GitHub Actions workflow
+                print("trigger update")
                 success = trigger_orbit_update(workflow_file)
                 print(f"success: {success}")
                 if not success:
@@ -58,7 +63,6 @@ def load_iss_data(override):
                     status_placeholder.empty()
                     return False, False
                 status_placeholder.empty()
-                print("Updated ISS position")
 
     except (HTTPError, URLError, OSError, requests.RequestException) as e:
         print("couldnt update")
@@ -80,4 +84,10 @@ def load_iss_data(override):
     epoch = convert_t(iss_geo.epoch)
 
     iss = earth + iss_geo
+
+    if success == False: 
+        st.info("Orbit data is up to date")
+    elif success == True: 
+        st.success(f"Orbit data has been updated (epoch: {epoch})")
+        
     return iss, epoch
