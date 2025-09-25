@@ -22,6 +22,7 @@ from datetime import datetime, timezone
 
 def load_iss_data(override):
     success = None 
+    st.write("override {override}")
     try:
         owner = "NoahJens"
         repo = "sun_iss_transit"
