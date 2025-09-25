@@ -36,6 +36,7 @@ def load_iss_data(override):
         if override:          
             r = requests.get(url_runs, headers=headers, params=params)
             r.raise_for_status()
+            st.write("override = True")
             runs = r.json().get("workflow_runs", [])
             
             age_days = None
