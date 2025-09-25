@@ -32,7 +32,9 @@ jobs:
         run: |
           git config --global user.name "github-actions"
           git config --global user.email "actions@github.com"
+          
           git add ISS.csv
+          
           if ! git diff --cached --quiet; then
             git commit -m "Update TLE file"
             git pull --rebase origin main
@@ -40,6 +42,7 @@ jobs:
             echo "updated=true" >> $GITHUB_OUTPUT
           else
             echo "updated=false" >> $GITHUB_OUTPUT
+          fi
 
       - name: Install dependencies
         if: steps.commit_csv.outputs.updated == 'true'
