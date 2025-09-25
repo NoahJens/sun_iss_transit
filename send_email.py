@@ -27,7 +27,6 @@ repo = "sun_iss_transit"
 file_path = "ISS.csv"
 branch = "main"
 workflow_file = "TLE_download.yml"
-headers = {"Authorization": f"token {st.secrets['GITHUB_TOKEN']}"}
 url_runs = f"https://api.github.com/repos/{owner}/{repo}/actions/workflows/{workflow_file}/runs"
 params = {"branch": "main", "per_page": 1}
 
