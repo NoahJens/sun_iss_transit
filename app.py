@@ -7,7 +7,7 @@ from utils import decimal_places, trigger_orbit_update
 # # Define observation point
 # observer = earth + wgs84.latlon(53.788419, 9.569346) # Sommerland 
 
-st.title("Sun - ISS Transit Calculator")
+st.title("Sun - ISS Transit Calculator?")
 
 if "iss" not in st.session_state or "epoch" not in st.session_state:
     print("session test")
