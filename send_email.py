@@ -1,6 +1,6 @@
 from skyfield.api import EarthSatellite, wgs84, load
 
-from astro_data import earth, sun
+from astro_data import earth, sun, ts
 from transit import find_transit 
 from datetime import datetime
 
