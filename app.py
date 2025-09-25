@@ -11,6 +11,7 @@ st.title("Sun - ISS Transit Calculator")
 
 if "iss" not in st.session_state or "epoch" not in st.session_state:
     print("session test")
+    st.write("session test")
     iss, epoch = load_iss_data(override = False)
     st.session_state.iss = iss
     st.session_state.epoch = epoch
