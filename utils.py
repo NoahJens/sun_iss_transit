@@ -47,7 +47,7 @@ def trigger_orbit_update(workflow: str, branch: str = "main") -> bool:
         "Authorization": f"token {token}",
         "Accept": "application/vnd.github+json"
     }
-
+    
     # 1️⃣ Trigger workflow
     url_dispatch = f"https://api.github.com/repos/{owner}/{repo}/actions/workflows/{workflow}/dispatches"
     r = requests.post(url_dispatch, headers=headers, json={"ref": branch})
@@ -63,22 +63,27 @@ def trigger_orbit_update(workflow: str, branch: str = "main") -> bool:
     while new_run_id is None:
         r = requests.get(url_runs, headers=headers, params=params)
         runs = r.json()["workflow_runs"]
+        # print(f"runs: {runs}")
 
         if runs:
             run = runs[0]
             if run["status"] in ["queued", "in_progress"]:
                 new_run_id = run["id"]
         time.sleep(3)
+        print(f"run ID: {new_run_id}")
 
     # 3️⃣ Poll that specific run until completed
     url_run = f"https://api.github.com/repos/{owner}/{repo}/actions/runs/{new_run_id}"
     while True:
         r = requests.get(url_run, headers=headers)
         run = r.json()
+        print(f"run status: {run["status"]}")
         if run["status"] == "completed":
+            print(f"run conclusion: {run["conclusion"]}")
             if run["conclusion"] == "success":
+                time.sleep(5) # wait for csv file to update
                 return True
             else:
-                st.error(f"Workflow failed: {run['conclusion']}")
+                # st.error(f"Workflow failed")
                 return False
         time.sleep(5)
