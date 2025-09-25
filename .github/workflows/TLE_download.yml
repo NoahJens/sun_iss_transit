@@ -18,26 +18,26 @@ jobs:
           persist-credentials: true   # allows push with GITHUB_TOKEN
           fetch-depth: 0              # fetch full history (needed for push)
           
-      - name: Simulate ISS update
-        run: |
-          echo "Simulating ISS.csv update..."
+      # - name: Simulate ISS update
+      #   run: |
+      #     echo "Simulating ISS.csv update..."
           
-      - name: Fetch ISS data
-        run: |
-          curl -s "https://celestrak.org/NORAD/elements/gp.php?GROUP=stations&FORMAT=json" -o ISS.csv
+      # - name: Fetch ISS data
+      #   run: |
+      #     curl -s "https://celestrak.org/NORAD/elements/gp.php?GROUP=stations&FORMAT=json" -o ISS.csv
 
-      - name: Commit and push updated ISS.csv
-        run: |
-          git config --global user.name "github-actions"
-          git config --global user.email "actions@github.com"
+      # - name: Commit and push updated ISS.csv
+      #   run: |
+      #     git config --global user.name "github-actions"
+      #     git config --global user.email "actions@github.com"
 
-          git add ISS.csv
+      #     git add ISS.csv
 
-          # Only commit if there are changes
-          if ! git diff --cached --quiet; then
-          git commit -m "Update TLE file"
-          git pull --rebase origin main
-          git push -f origin main
-          else
-            echo "ISS.csv unchanged — skipping commit and push."
-          fi
+      #     # Only commit if there are changes
+      #     if ! git diff --cached --quiet; then
+      #     git commit -m "Update TLE file"
+      #     git pull --rebase origin main
+      #     git push -f origin main
+      #     else
+      #       echo "ISS.csv unchanged — skipping commit and push."
+      #     fi
