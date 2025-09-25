@@ -45,8 +45,8 @@ def load_iss_data(override):
 
             if runs:
                 last_run = runs[0]
-                st.write(f"last run: {last_run}")
-                print(f"last run: {last_run["id"]}")
+                st.write(f"last run: {last_run['id']}")
+                print(f"last run: {last_run['id']}")
                 completed_at = last_run.get("updated_at") or last_run.get("created_at")
                 completed_dt = datetime.fromisoformat(completed_at.replace("Z", "+00:00"))
                 age_days = (datetime.now(timezone.utc) - completed_dt).total_seconds() / 86400
