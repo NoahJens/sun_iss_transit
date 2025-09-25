@@ -42,7 +42,7 @@ jobs:
           #   echo "updated=true" >> $GITHUB_OUTPUT
           # else
           #   echo "updated=false" >> $GITHUB_OUTPUT
-          fi
+          # fi
 
       - name: Install dependencies
         # if: steps.commit_csv.outputs.updated == 'true'
