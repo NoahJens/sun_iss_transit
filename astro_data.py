@@ -51,7 +51,7 @@ def load_iss_data(override):
                 print(f"age days: {age_days}")
 
             # Trigger workflow if no run exists or last run is too old
-            if not runs or age_days >= 0.00069:  # 0.1 days ≈ 2.4 hours
+            if not runs or age_days >= 0.1:  # 0.1 days ≈ 2.4 hours
                 status_placeholder = st.empty()
                 status_placeholder.markdown(
                     "<span style='color:red'>Updating ISS orbit data... please wait</span>",
