@@ -46,7 +46,7 @@ iss = earth + iss_geo
 observer = earth + wgs84.latlon(53.7985, 9.5470)
 transit = find_transit(observer, sun, iss)
 transit["Epoch"] = epoch
-transit.to_csv("transits.csv", index=False)
+transit.to_csv("transits.csv", index=False, float_format="%.2f")
 
 if not transit.empty:
 
