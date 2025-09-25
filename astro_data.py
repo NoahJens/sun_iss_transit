@@ -5,6 +5,7 @@ import streamlit as st
 import json
 import requests
 from datetime import datetime, timezone
+import time
 
 ts = load.timescale()
 
@@ -13,7 +14,7 @@ earth, sun = planets['earth'], planets['sun']
 
 # Load ISS position data from CelesTrak
 max_days = .1    # download again once 7 days old
-name = 'ISS.csv'  # custom filename, not 'gp.php'
+# name = 'ISS.csv'  # custom filename, not 'gp.php'
 
 import requests
 import json
@@ -22,20 +23,23 @@ from datetime import datetime, timezone
 def load_iss_data(override):
     success = None 
     try:
+        owner = "NoahJens"
+        repo = "sun_iss_transit"
+        file_path = "ISS.csv"
+        branch = "main"
+        workflow_file = "TLE_download.yml"
+        headers = {"Authorization": f"token {st.secrets['GITHUB_TOKEN']}"}
+        url_runs = f"https://api.github.com/repos/{owner}/{repo}/actions/workflows/{workflow_file}/runs"
+        params = {"branch": "main", "per_page": 1}
+
         # Check last workflow run instead of commit date
-        if override:
-            owner = "NoahJens"
-            repo = "sun_iss_transit"
-            workflow_file = "TLE_download.yml"
-            headers = {"Authorization": f"token {st.secrets['GITHUB_TOKEN']}"}
-            url_runs = f"https://api.github.com/repos/{owner}/{repo}/actions/workflows/{workflow_file}/runs"
-            params = {"branch": "main", "per_page": 1}
-            
+        if override:          
             r = requests.get(url_runs, headers=headers, params=params)
             r.raise_for_status()
             runs = r.json().get("workflow_runs", [])
             
             age_days = None
+
             success = False 
 
             if runs:
@@ -56,10 +60,12 @@ def load_iss_data(override):
 
                 # Trigger GitHub Actions workflow
                 print("trigger update")
+                repo_state_before = requests.get(f"https://api.github.com/repos/{owner}/{repo}/commits/main", headers=headers).json()["sha"]
                 success = trigger_orbit_update(workflow_file)
+                repo_state_after = requests.get(f"https://api.github.com/repos/{owner}/{repo}/commits/main", headers=headers).json()["sha"]
                 print(f"success: {success}")
                 if not success:
-                    st.error("⚠️ Could not trigger TLE update workflow.")
+                    st.error("⚠️ Could not trigger TLE update workflow or workflow failed")
                     status_placeholder.empty()
                     return False, False
                 status_placeholder.empty()
@@ -71,10 +77,16 @@ def load_iss_data(override):
     
     print("load_iss_data")
     # Load ISS position from online repo
-    url = "https://raw.githubusercontent.com/NoahJens/sun_iss_transit/main/ISS.csv"
-    r = requests.get(url)
+    url_commit = f"https://api.github.com/repos/{owner}/{repo}/commits?path={file_path}&sha={branch}"
+    r = requests.get(url_commit)
     r.raise_for_status()
-    data = json.loads(r.text)
+    latest_commit_sha = r.json()[0]["sha"]
+
+    # Fetch CSV at that commit
+    url_raw_commit = f"https://raw.githubusercontent.com/{owner}/{repo}/{latest_commit_sha}/{file_path}"
+    r = requests.get(url_raw_commit)
+    r.raise_for_status()
+    data = r.json()
 
     # Find the ISS row (using NORAD ID is safest)
     iss_row = next(row for row in data if row.get("NORAD_CAT_ID") == 25544)
@@ -88,6 +100,8 @@ def load_iss_data(override):
     if success == False: 
         st.info("Orbit data is up to date")
     elif success == True: 
-        st.success(f"Orbit data has been updated (epoch: {epoch})")
-        
+        if repo_state_before == repo_state_after: 
+            st.info("No new orbit data available")
+        else:
+            st.success(f"Orbit data has been updated (epoch: {epoch})")
     return iss, epoch

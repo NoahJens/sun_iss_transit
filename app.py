@@ -10,13 +10,13 @@ from utils import decimal_places, trigger_orbit_update
 st.title("Sun - ISS Transit Calculator")
 
 if "iss" not in st.session_state or "epoch" not in st.session_state:
+    print("session test")
     iss, epoch = load_iss_data(override = False)
-    if iss == False:
-        exit 
     st.session_state.iss = iss
     st.session_state.epoch = epoch
 
 # Use cached values
+print("overwrite session values")
 iss = st.session_state.iss
 epoch = st.session_state.epoch
 
@@ -25,6 +25,7 @@ st.write(f'ISS orbit data from {epoch}')
 if st.button("Update ISS orbit data"):
     override = True
     iss, epoch = load_iss_data(override)
+    print(f"epoch inside button: {epoch}")
     st.session_state.iss = iss
     st.session_state.epoch = epoch
     

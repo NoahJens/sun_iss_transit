@@ -47,7 +47,7 @@ def trigger_orbit_update(workflow: str, branch: str = "main") -> bool:
         "Authorization": f"token {token}",
         "Accept": "application/vnd.github+json"
     }
-
+    
     # 1️⃣ Trigger workflow
     url_dispatch = f"https://api.github.com/repos/{owner}/{repo}/actions/workflows/{workflow}/dispatches"
     r = requests.post(url_dispatch, headers=headers, json={"ref": branch})
@@ -81,8 +81,9 @@ def trigger_orbit_update(workflow: str, branch: str = "main") -> bool:
         if run["status"] == "completed":
             print(f"run conclusion: {run["conclusion"]}")
             if run["conclusion"] == "success":
+                time.sleep(5) # wait for csv file to update
                 return True
             else:
-                st.error(f"Workflow failed: {run['conclusion']}")
+                # st.error(f"Workflow failed")
                 return False
         time.sleep(5)
