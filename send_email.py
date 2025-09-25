@@ -11,7 +11,7 @@ from email import encoders
 import os
 
 # Calculate transits 
-iss, epoch = load_iss_data()
+iss, epoch = load_iss_data(override = True)
 observer = earth + wgs84.latlon(53.7985, 9.5470)
 transit = find_transit(observer, sun, iss)
 transit["Epoch"] = epoch
