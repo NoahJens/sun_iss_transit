@@ -67,13 +67,13 @@ def load_iss_data(override):
                 if not success:
                     st.error("⚠️ Could not trigger TLE update workflow or workflow failed")
                     status_placeholder.empty()
-                    return False, False
+                    return 
                 status_placeholder.empty()
 
     except (HTTPError, URLError, OSError) as e:
         print("couldnt update")
         st.error(f"⚠️ Could not update TLE ({e})")
-        return False, False
+        return 
     
     print("load_iss_data")
     # Load ISS position from online repo

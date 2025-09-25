@@ -1,5 +1,4 @@
-from skyfield.api import wgs84
-from astro_data import earth, sun, load_iss_data
+from skyfield.api import wgs84, load, EarthSatellite
 from transit import find_transit 
 from datetime import datetime
 
@@ -9,9 +8,42 @@ from email.mime.multipart import MIMEMultipart
 from email.mime.base import MIMEBase
 from email import encoders
 import os
+import requests
+from utils import convert_t
+
+ts = load.timescale()
+
+planets = load('de421.bsp')
+earth, sun = planets['earth'], planets['sun']
+
+owner = "NoahJens"
+repo = "sun_iss_transit"
+file_path = "ISS.csv"
+branch = "main"
+
+# Calculate iss data 
+url_commit = f"https://api.github.com/repos/{owner}/{repo}/commits?path={file_path}&sha={branch}"
+r = requests.get(url_commit)
+r.raise_for_status()
+latest_commit_sha = r.json()[0]["sha"]
+
+# Fetch CSV at that commit
+url_raw_commit = f"https://raw.githubusercontent.com/{owner}/{repo}/{latest_commit_sha}/{file_path}"
+r = requests.get(url_raw_commit)
+r.raise_for_status()
+data = r.json()
+
+# Find the ISS row (using NORAD ID is safest)
+iss_row = next(row for row in data if row.get("NORAD_CAT_ID") == 25544)
+
+# Create the EarthSatellite object
+iss_geo = EarthSatellite.from_omm(ts, iss_row) # gets the geocentric information on the iss
+epoch = convert_t(iss_geo.epoch)
+
+iss = earth + iss_geo
+
 
 # Calculate transits 
-iss, epoch = load_iss_data(override = True)
 observer = earth + wgs84.latlon(53.7985, 9.5470)
 transit = find_transit(observer, sun, iss)
 transit["Epoch"] = epoch
@@ -21,7 +53,7 @@ if not transit.empty:
 
     # File to send
     filename = "transits.csv"
-    email_filename = f"transits_{datetime.now().strftime("%Y%m%d")}.csv"
+    email_filename = f"transits_{datetime.now().strftime('%Y%m%d')}.csv"
 
     # Email setup
     msg = MIMEMultipart()
