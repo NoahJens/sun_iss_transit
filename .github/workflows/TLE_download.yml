@@ -18,13 +18,13 @@ jobs:
           persist-credentials: true   # allows push with GITHUB_TOKEN
           fetch-depth: 0              # fetch full history (needed for push)
           
-      # - name: Simulate ISS update
-        # run: |
-          # echo "Simulating ISS.csv update..."
-          
-      - name: Fetch ISS data
+      - name: Simulate ISS update
         run: |
-          curl -s "https://celestrak.org/NORAD/elements/gp.php?GROUP=stations&FORMAT=json" -o ISS.csv
+          echo "Simulating ISS.csv update..."
+          
+      #- name: Fetch ISS data
+        #run: |
+          #curl -s "https://celestrak.org/NORAD/elements/gp.php?GROUP=stations&FORMAT=json" -o ISS.csv
 
       - name: Commit and push updated ISS.csv
         run: |
