@@ -81,7 +81,7 @@ def trigger_orbit_update(workflow: str, branch: str = "main") -> bool:
         if run["status"] == "completed":
             print(f"run conclusion: {run["conclusion"]}")
             if run["conclusion"] == "success":
-                time.sleep(5) # wait for csv file to update
+                time.sleep(10) # wait for csv file to update
                 return True
             else:
                 # st.error(f"Workflow failed")
