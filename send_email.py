@@ -16,10 +16,8 @@ import time
 
 time.sleep(10)
 
-ts = load.timescale()
-
-planets = load('de421.bsp')
-earth, sun = planets['earth'], planets['sun']
+# planets = load('de421.bsp')
+# earth, sun = planets['earth'], planets['sun']
 observer = earth + wgs84.latlon(53.7985, 9.5470)
 
 owner = "NoahJens"
