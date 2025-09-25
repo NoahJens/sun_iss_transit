@@ -39,7 +39,7 @@ def find_transit(observer, sun, iss):
 
     window_minutes = 2
     offset_minutes= window_minutes / (24 * 60)
-    fine_threshold_deg = 8#2
+    fine_threshold_deg = 2
 
     records = []
 
