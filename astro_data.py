@@ -56,11 +56,11 @@ def load_iss_data(override):
 
             # Trigger workflow if no run exists or last run is too old
             if not runs or age_days >= max_days:  # 0.1 days ≈ 2.4 hours
-                # status_placeholder = st.empty()
-                # status_placeholder.markdown(
-                #     "<span style='color:red'>Updating ISS orbit data... please wait</span>",
-                #     unsafe_allow_html=True
-                # )
+                status_placeholder = st.empty()
+                status_placeholder.markdown(
+                    "<span style='color:red'>Updating ISS orbit data... please wait</span>",
+                    unsafe_allow_html=True
+                )
                 # st.write("Updating iss orbit data... please wait")
                 # Trigger GitHub Actions workflow
                 print("trigger update")
