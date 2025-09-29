@@ -51,34 +51,35 @@ transit = find_transit(observer, sun, iss)
 transit["Orbit data timestamp"] = epoch
 transit.to_csv("transits.csv", index=False, float_format="%.2f")
 
-# Send email, when transits are found
+# Allow multiple recipients via secrets
+recipients = os.environ["EMAIL_TO"].split(",")  # EMAIL_TO="first@example.com,second@example.com"
+
 if not transit.empty: 
     filename = "transits.csv"
     email_filename = f"transits_{datetime.now().strftime('%Y%m%d')}.csv"
 
-    # Email setup
-    msg = MIMEMultipart()
-    msg["From"] = os.environ["EMAIL_FROM"]
-    msg["To"] = os.environ["EMAIL_TO"]
-    msg["Subject"] = "Sun ISS transits"
+    for recipient in recipients:
+        msg = MIMEMultipart()
+        msg["From"] = os.environ["EMAIL_FROM"]
+        msg["To"] = recipient.strip()  # remove spaces
+        msg["Subject"] = "Sun ISS transits"
 
-    # Body
-    msg.attach(MIMEText("Please find the CSV attached with a 7 day forecast", "plain"))
+        msg.attach(MIMEText("Please find the CSV attached with a 7 day forecast", "plain"))
 
-    # Attach CSV
-    with open(filename, "rb") as f:
-        part = MIMEBase("application", "octet-stream")
-        part.set_payload(f.read())
-    encoders.encode_base64(part)
-    part.add_header("Content-Disposition", f"attachment; filename={email_filename}")
-    msg.attach(part)
+        with open(filename, "rb") as f:
+            part = MIMEBase("application", "octet-stream")
+            part.set_payload(f.read())
+        encoders.encode_base64(part)
+        part.add_header("Content-Disposition", f"attachment; filename={email_filename}")
+        msg.attach(part)
 
-    # Send
-    with smtplib.SMTP_SSL("smtp.gmail.com", 465) as server:
-        server.login(os.environ["EMAIL_FROM"], os.environ["EMAIL_PASSWORD"])
-        server.send_message(msg)
+        # Send
+        with smtplib.SMTP_SSL("smtp.gmail.com", 465) as server:
+            server.login(os.environ["EMAIL_FROM"], os.environ["EMAIL_PASSWORD"])
+            server.send_message(msg)
 
 else:
     print("No transit events — email not sent")
+
 
 
