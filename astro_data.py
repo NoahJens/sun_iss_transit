@@ -22,8 +22,8 @@ def load_iss_data(override):
         # Define data for fetching ISS orbit data CSV file from repo 
         owner = "NoahJens"
         repo = "sun_iss_transit"
-        file_path = "ISS.csv"
         branch = "main"
+        file_path = "ISS.csv"
 
         # Define data to check workflow execution
         workflow_file = "TLE_download.yml"
