@@ -87,7 +87,7 @@ def find_transit(observer, sun, iss):
     # FINE CHECK 
     # ---------------------------------------------------------
 
-    window_minutes = 2 # check two minutes in past and 2 in future from coarse candidate (covers the 4 minutes of the coarse scan)
+    window_minutes = 2 # Check two minutes in past and 2 in future from coarse candidate (covers the 4 minutes of the coarse scan)
     offset_minutes= window_minutes / (24 * 60)
     fine_threshold_deg = 2 # 2 degrees angular seperation as threshold for fine scan
 
@@ -108,11 +108,11 @@ def find_transit(observer, sun, iss):
             if separation <= fine_threshold_deg:
                 pairs.append((t, separation, sun_alt))
 
-        # append only the time with the minimum separation to the records
+        # Append only the time with the minimum separation to the records
         if pairs:
             best_time, min_sep, min_alt = min(pairs, key=lambda x: x[1])
             records.append((convert_t(best_time), min_sep, min_alt))
  
-    # write the pair with the smallest angular separation of each candidate to a df (if separation is under 2 degree) 
+    # Write the pair with the smallest angular separation of each candidate to a df (if separation is under 2 degree) 
     df = pd.DataFrame(records, columns=["Time CEST", "Separation [deg]", "Sun altitude [deg]"])
     return df

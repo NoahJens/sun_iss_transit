@@ -9,7 +9,7 @@ def convert_t(t):
     and return a formatted string.
     
     Args:
-        t (Time or datetime): Time to convert.
+        t (Time or datetime): Time to convert. 
         
     Returns:
         str: Time formatted as 'YYYY-MM-DD HH:MM:SS CEST'.
