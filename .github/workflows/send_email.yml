@@ -2,7 +2,7 @@ name: Send email
 on:
   schedule:
     - cron: "0 5 */3 * *"  # Every 3 days at 05:00 UTC
-  workflow_dispatch:       # allow manual trigger from GitHub UI
+  workflow_dispatch:       # allow manual trigger from GitHub 
 
 permissions:
   contents: write
@@ -15,7 +15,7 @@ jobs:
       - name: Set up Python
         uses: actions/setup-python@v4
         with:
-          python-version: "3.12"  # or whichever version you need
+          python-version: "3.12" 
 
       - name: Checkout repo
         uses: actions/checkout@v3
@@ -35,23 +35,16 @@ jobs:
           
           git add ISS.csv
           
-          # if ! git diff --cached --quiet; then
           git commit -m "Update TLE file"
           git pull --rebase origin main
           git push -f origin main
-          #   echo "updated=true" >> $GITHUB_OUTPUT
-          # else
-          #   echo "updated=false" >> $GITHUB_OUTPUT
-          # fi
 
       - name: Install dependencies
-        # if: steps.commit_csv.outputs.updated == 'true'
         run: |
           python -m pip install --upgrade pip
           pip install -r requirements.txt
 
       - name: Send email
-        # if: steps.commit_csv.outputs.updated == 'true'
         run: python send_email.py
         env:
           EMAIL_FROM: ${{ secrets.EMAIL_FROM }}

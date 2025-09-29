@@ -24,24 +24,19 @@ repo = "sun_iss_transit"
 branch = "main"
 file_path = "ISS.csv"
 
-# # Calculate iss data 
-# url_commit = f"https://api.github.com/repos/{owner}/{repo}/commits?path={file_path}&sha={branch}"
-# r = requests.get(url_commit)
-# r.raise_for_status()
-# latest_commit_sha = r.json()[0]["sha"]
-
-# # Fetch CSV at that commit
-# url_raw_commit = f"https://raw.githubusercontent.com/{owner}/{repo}/{latest_commit_sha}/{file_path}"
-# r = requests.get(url_raw_commit)
-# r.raise_for_status()
-# data = r.json()
-
-url = f"https://raw.githubusercontent.com/{owner}/{repo}/{branch}/{file_path}"
-r = requests.get(url)
+# Load last commit of repo (new CSV file was automatically committed by workflow)
+url_commit = f"https://api.github.com/repos/{owner}/{repo}/commits?path={file_path}&sha={branch}"
+r = requests.get(url_commit)
 r.raise_for_status()
-data = r.json() 
+latest_commit_sha = r.json()[0]["sha"]
 
-# Find the ISS row (using NORAD ID is safest)
+# Fetch CSV at that commit
+url_raw_commit = f"https://raw.githubusercontent.com/{owner}/{repo}/{latest_commit_sha}/{file_path}"
+r = requests.get(url_raw_commit)
+r.raise_for_status()
+data = r.json()
+
+# Find the ISS row
 iss_row = next(row for row in data if row.get("NORAD_CAT_ID") == 25544)
 
 # Create the EarthSatellite object
@@ -51,14 +46,13 @@ epoch = convert_t(iss_geo.epoch)
 iss = earth + iss_geo
 
 # Calculate transits 
-observer = earth + wgs84.latlon(53.7985, 9.5470)
+observer = earth + wgs84.latlon(53.7985, 9.5470) # Specific observer
 transit = find_transit(observer, sun, iss)
 transit["Epoch"] = epoch
 transit.to_csv("transits.csv", index=False, float_format="%.2f")
 
-if not transit.empty:
-
-    # File to send
+# Send email, when transits are found
+if not transit.empty: 
     filename = "transits.csv"
     email_filename = f"transits_{datetime.now().strftime('%Y%m%d')}.csv"
 
@@ -85,6 +79,6 @@ if not transit.empty:
         server.send_message(msg)
 
 else:
-    print("No transit events — email not sent.")
+    print("No transit events — email not sent")
 
 

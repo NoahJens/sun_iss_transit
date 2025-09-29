@@ -72,23 +72,18 @@ def load_iss_data(override):
     except (HTTPError, URLError, OSError) as e:
         st.error(f"⚠️ Could not update ISS orbit data ({e})")
         return 
-    
-    url = f"https://raw.githubusercontent.com/{owner}/{repo}/{branch}/{file_path}"
-    r = requests.get(url)
+
+    # Load last commit of repo (new CSV file was automatically committed by workflow)
+    url_commit = f"https://api.github.com/repos/{owner}/{repo}/commits?path={file_path}&sha={branch}"
+    r = requests.get(url_commit)
     r.raise_for_status()
-    data = r.json() 
+    latest_commit_sha = r.json()[0]["sha"]
 
-    # # Load last commit of repo (new CSV file was automatically committed by workflow)
-    # url_commit = f"https://api.github.com/repos/{owner}/{repo}/commits?path={file_path}&sha={branch}"
-    # r = requests.get(url_commit)
-    # r.raise_for_status()
-    # latest_commit_sha = r.json()[0]["sha"]
-
-    # # Fetch CSV at that commit
-    # url_raw_commit = f"https://raw.githubusercontent.com/{owner}/{repo}/{latest_commit_sha}/{file_path}"
-    # r = requests.get(url_raw_commit)
-    # r.raise_for_status()
-    # data = r.json()
+    # Fetch CSV at that commit
+    url_raw_commit = f"https://raw.githubusercontent.com/{owner}/{repo}/{latest_commit_sha}/{file_path}"
+    r = requests.get(url_raw_commit)
+    r.raise_for_status()
+    data = r.json()
 
     # Find the ISS row 
     iss_row = next(row for row in data if row.get("NORAD_CAT_ID") == 25544)
