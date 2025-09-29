@@ -47,7 +47,7 @@ if st.button("Run"):
             unsafe_allow_html=True
         )
         transit = find_transit(observer, sun, st.session_state.iss)
-        transit["Epoch"] = st.session_state.epoch # Add epoch to dataframe
+        transit["Data timestamp"] = st.session_state.epoch # Add epoch to dataframe
     
         status_placeholder.empty()
 
