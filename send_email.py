@@ -54,7 +54,8 @@ transit.to_csv("transits.csv", index=False, float_format="%.2f")
 # Allow multiple recipients via secrets
 recipients = os.environ["EMAIL_TO"].split(",")  # EMAIL_TO="first@example.com,second@example.com"
 
-if not transit.empty: 
+# if not transit.empty: 
+if transit.empty:
     filename = "transits.csv"
     email_filename = f"transits_{datetime.now().strftime('%Y%m%d')}.csv"
 
