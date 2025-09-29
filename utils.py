@@ -1,93 +1,44 @@
 import pytz
-import requests
-import streamlit as st
-import time
 
 from skyfield.timelib import Time
 from datetime import datetime
 
-def angular_separation(t, observer, sun, iss):
-    """
-    Angular separation (degrees) between Sun and ISS as seen by observer
-    """
-    sun_vec = observer.at(t).observe(sun).apparent()
-    iss_vec = observer.at(t).observe(iss).apparent()
-
-    sun_alt, _, _ = sun_vec.altaz()
-    sun_alt = sun_alt.degrees
-    
-    return sun_vec.separation_from(iss_vec).degrees, sun_alt
-
 def convert_t(t):
     """
-    Convert a Skyfield Time or a datetime object to Berlin time and format as string
+    Convert a Skyfield Time or datetime object to Berlin (CEST) timezone
+    and return a formatted string.
+    
+    Args:
+        t (Time or datetime): Time to convert.
+        
+    Returns:
+        str: Time formatted as 'YYYY-MM-DD HH:MM:SS CEST'.
     """
+
     if isinstance(t, Time):  # Skyfield Time object
         t_utc = t.utc_datetime()
-    elif isinstance(t, datetime):  # regular datetime
+    elif isinstance(t, datetime):  # Regular datetime object
         t_utc = t
     else:
         raise TypeError("t must be a Skyfield Time or datetime object")
 
+    # Convert to Berlin timezone
     t_berlin = t_utc.astimezone(pytz.timezone('Europe/Berlin'))
     return t_berlin.strftime("%Y-%m-%d %H:%M:%S %Z")
 
 def decimal_places(value):
     """
-    Return number of decimal places
+    Count the number of decimal places in a numeric value.
+    
+    Args:
+        value (float or str): Number to inspect.
+        
+    Returns:
+        int: Number of digits after the decimal point.
     """
+
     s = str(value)
     if '.' in s:
         return len(s.split('.')[-1])
     else:
         return 0
-
-def trigger_orbit_update(workflow: str, branch: str = "main") -> bool:
-    """
-    Trigger workflow run, which updates the ISS orbit data
-    """
-    token = st.secrets["GITHUB_TOKEN"]
-    owner = "NoahJens"
-    repo = "sun_iss_transit"
-
-    headers = {
-        "Authorization": f"token {token}",
-        "Accept": "application/vnd.github+json"
-    }
-    
-    # trigger workflow
-    url_dispatch = f"https://api.github.com/repos/{owner}/{repo}/actions/workflows/{workflow}/dispatches"
-    r = requests.post(url_dispatch, headers=headers, json={"ref": branch})
-    if r.status_code != 204:
-        st.error(f"Failed to trigger workflow: {r.status_code} {r.text}")
-        return False
-
-    # wait for a new run to appear
-    url_runs = f"https://api.github.com/repos/{owner}/{repo}/actions/workflows/{workflow}/runs"
-    params = {"branch": branch, "per_page": 1}
-    new_run_id = None
-
-    while new_run_id is None:
-        r = requests.get(url_runs, headers=headers, params=params)
-        runs = r.json()["workflow_runs"]
-
-        if runs:
-            run = runs[0]
-            if run["status"] in ["queued", "in_progress"]:
-                new_run_id = run["id"]
-        time.sleep(3)
-
-    # poll that specific run until completed
-    url_run = f"https://api.github.com/repos/{owner}/{repo}/actions/runs/{new_run_id}"
-
-    while True:
-        r = requests.get(url_run, headers=headers)
-        run = r.json()
-        
-        if run["status"] == "completed":
-            if run["conclusion"] == "success":
-                time.sleep(10) # wait for csv file to update
-                return True
-            else:
-                return False
-        time.sleep(5)

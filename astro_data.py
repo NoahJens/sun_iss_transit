@@ -1,7 +1,9 @@
 import streamlit as st
 import requests
+import time
+
 from skyfield.api import load, EarthSatellite
-from utils import convert_t, trigger_orbit_update
+from utils import convert_t
 from urllib.error import URLError, HTTPError
 from datetime import datetime, timezone
 
@@ -15,7 +17,79 @@ earth, sun = planets['earth'], planets['sun']
 # Allow new download of ISS orbit data from Celestrak every max_days  
 max_days = .1  
 
+def trigger_orbit_update(workflow: str, branch: str = "main") -> bool:
+    """
+    Trigger a GitHub Actions workflow to update ISS orbit data and wait
+    until the workflow completes.
+    
+    Args:
+        workflow (str): Name of the workflow YAML file in the repo.
+        branch (str): Branch to trigger the workflow on (default "main").
+        
+    Returns:
+        bool: True if workflow completed successfully, False otherwise.
+    """
+
+    token = st.secrets["GITHUB_TOKEN"]
+    owner = "NoahJens"
+    repo = "sun_iss_transit"
+
+    headers = {
+        "Authorization": f"token {token}",
+        "Accept": "application/vnd.github+json"
+    }
+    
+    # Trigger the workflow run
+    url_dispatch = f"https://api.github.com/repos/{owner}/{repo}/actions/workflows/{workflow}/dispatches"
+    r = requests.post(url_dispatch, headers=headers, json={"ref": branch})
+    if r.status_code != 204:
+        st.error(f"Failed to trigger workflow: {r.status_code} {r.text}")
+        return False
+
+    # Wait for the new run to appear in workflow runs
+    url_runs = f"https://api.github.com/repos/{owner}/{repo}/actions/workflows/{workflow}/runs"
+    params = {"branch": branch, "per_page": 1}
+    new_run_id = None
+
+    while new_run_id is None:
+        r = requests.get(url_runs, headers=headers, params=params)
+        runs = r.json()["workflow_runs"]
+
+        if runs:
+            run = runs[0]
+            if run["status"] in ["queued", "in_progress"]:
+                new_run_id = run["id"]
+        time.sleep(3)  # wait a bit before checking again
+
+    # Poll the workflow run until completed
+    url_run = f"https://api.github.com/repos/{owner}/{repo}/actions/runs/{new_run_id}"
+
+    while True:
+        r = requests.get(url_run, headers=headers)
+        run = r.json()
+        
+        if run["status"] == "completed":
+            if run["conclusion"] == "success":
+                time.sleep(10)  # give some time for CSV file to be updated
+                return True
+            else:
+                return
+
 def load_iss_data():
+    """
+    Fetch the latest ISS orbit data and return a Skyfield EarthSatellite object and epoch.
+
+    - Checks the last workflow run in the GitHub repository to see if ISS data is recent.
+    - If the data is outdated (older than max_days) or missing, triggers the GitHub workflow to update it.
+    - Downloads the ISS CSV file at the latest commit and extracts the row for NORAD_CAT_ID 25544.
+    - Creates a Skyfield EarthSatellite object and computes the corresponding epoch.
+    - Displays Streamlit messages indicating whether data was up-to-date, updated, or failed to update.
+    
+    Returns:
+        iss (EarthSatellite): Skyfield satellite object with ISS orbit data.
+        epoch (datetime): Epoch of the ISS TLE/OMM data in CEST.
+    """
+
     success = None # Variable for determining, if workflow successfully finished
 
     try:

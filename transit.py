@@ -1,10 +1,54 @@
 import numpy as np 
 import pandas as pd
 
-from utils import convert_t, angular_separation
+from utils import convert_t
 from astro_data import ts 
 
+def angular_separation(t, observer, sun, iss):
+    """
+    Calculate the angular separation (in degrees) between the Sun and ISS
+    as seen by a given observer, along with the Sun's altitude.
+    
+    Args:
+        t (Time): Skyfield Time object representing the observation time.
+        observer: Skyfield observer object (Earth location).
+        sun: Skyfield Sun object.
+        iss: Skyfield EarthSatellite object representing the ISS.
+        
+    Returns:
+        separation_deg (float): Angular separation between Sun and ISS in degrees.
+        sun_alt_deg (float): Sun's altitude in degrees.
+    """
+
+    sun_vec = observer.at(t).observe(sun).apparent()
+    iss_vec = observer.at(t).observe(iss).apparent()
+
+    # Compute Sun altitude in degrees
+    sun_alt, _, _ = sun_vec.altaz()
+    sun_alt = sun_alt.degrees
+    
+    # Compute angular separation between Sun and ISS
+    return sun_vec.separation_from(iss_vec).degrees, sun_alt
+
 def find_transit(observer, sun, iss):
+    """
+    Calculate potential Sun-ISS transit events for a given observer over the next 7 days.
+
+    The function performs a two-step search:
+    1. Coarse scan every 4 minutes to find candidate times when the ISS passes close to the Sun.
+    2. Fine scan at 1-second resolution around each candidate to find the moment of minimum angular separation.
+
+    Args:
+        observer: Skyfield observer object representing the observer's location on Earth.
+        sun: Skyfield Sun object.
+        iss: Skyfield EarthSatellite object representing the ISS.
+
+    Returns:
+        pd.DataFrame: A dataframe containing times of potential transits in CEST, 
+                      the angular separation between the ISS and Sun in degrees, 
+                      and the Sun's altitude in degrees.
+    """
+
     # Start time as Skyfield time
     start_date = ts.now()
 
