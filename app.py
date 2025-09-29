@@ -15,7 +15,7 @@ st.write(f'ISS orbit data from {st.session_state.epoch}')
 
 # Refreshing orbit data of ISS
 if st.button("Update ISS orbit data"):
-    override = True
+    override = True # Forces check, if ISS orbit data is recent and updtes accordingly 
     st.session_state.iss, st.session_state.epoch = load_iss_data(override)
     
 st.text('Apparent diameter of sun approx. 0.5 degrees')
