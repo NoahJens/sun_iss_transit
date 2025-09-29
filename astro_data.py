@@ -59,7 +59,7 @@ def trigger_orbit_update(workflow: str, branch: str = "main") -> bool:
             run = runs[0]
             if run["status"] in ["queued", "in_progress"]:
                 new_run_id = run["id"]
-        time.sleep(3)  # wait a bit before checking again
+        time.sleep(3)  # Wait a bit before checking again
 
     # Poll the workflow run until completed
     url_run = f"https://api.github.com/repos/{owner}/{repo}/actions/runs/{new_run_id}"
@@ -70,7 +70,7 @@ def trigger_orbit_update(workflow: str, branch: str = "main") -> bool:
         
         if run["status"] == "completed":
             if run["conclusion"] == "success":
-                time.sleep(10)  # give some time for CSV file to be updated
+                time.sleep(10)  # Give some time for CSV file to be updated
                 return True
             else:
                 return
@@ -131,7 +131,7 @@ def load_iss_data():
             repo_state_before = requests.get(f"https://api.github.com/repos/{owner}/{repo}/commits/main", 
                                                 headers=headers).json()["sha"]
             
-            success = trigger_orbit_update(workflow_file) # trigger workflow for updating ISS orbit data
+            success = trigger_orbit_update(workflow_file) # Trigger workflow for updating ISS orbit data
 
             repo_state_after = requests.get(f"https://api.github.com/repos/{owner}/{repo}/commits/main", 
                                             headers=headers).json()["sha"]
@@ -163,8 +163,8 @@ def load_iss_data():
     iss_row = next(row for row in data if row.get("NORAD_CAT_ID") == 25544)
 
     # Create the EarthSatellite object
-    iss_geo = EarthSatellite.from_omm(ts, iss_row) # gets the geocentric information on the ISS
-    epoch = convert_t(iss_geo.epoch) # Convert epoch to CEST time 
+    iss_geo = EarthSatellite.from_omm(ts, iss_row) # Gets the geocentric information on the ISS
+    epoch = convert_t(iss_geo.epoch) # Convert epoch to CEST time
 
     iss = earth + iss_geo
 
