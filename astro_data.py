@@ -24,6 +24,8 @@ def load_iss_data(override):
         repo = "sun_iss_transit"
         file_path = "ISS.csv"
         branch = "main"
+
+        # Define data to check workflow execution
         workflow_file = "TLE_download.yml"
         headers = {"Authorization": f"token {st.secrets['GITHUB_TOKEN']}"}
         url_runs = f"https://api.github.com/repos/{owner}/{repo}/actions/workflows/{workflow_file}/runs"
@@ -71,17 +73,22 @@ def load_iss_data(override):
         st.error(f"⚠️ Could not update ISS orbit data ({e})")
         return 
     
-    # Load last commit of repo (new CSV file was automatically committed by workflow)
-    url_commit = f"https://api.github.com/repos/{owner}/{repo}/commits?path={file_path}&sha={branch}"
-    r = requests.get(url_commit)
+    url = f"https://raw.githubusercontent.com/{owner}/{repo}/{branch}/{file_path}"
+    r = requests.get(url)
     r.raise_for_status()
-    latest_commit_sha = r.json()[0]["sha"]
+    data = r.json() 
 
-    # Fetch CSV at that commit
-    url_raw_commit = f"https://raw.githubusercontent.com/{owner}/{repo}/{latest_commit_sha}/{file_path}"
-    r = requests.get(url_raw_commit)
-    r.raise_for_status()
-    data = r.json()
+    # # Load last commit of repo (new CSV file was automatically committed by workflow)
+    # url_commit = f"https://api.github.com/repos/{owner}/{repo}/commits?path={file_path}&sha={branch}"
+    # r = requests.get(url_commit)
+    # r.raise_for_status()
+    # latest_commit_sha = r.json()[0]["sha"]
+
+    # # Fetch CSV at that commit
+    # url_raw_commit = f"https://raw.githubusercontent.com/{owner}/{repo}/{latest_commit_sha}/{file_path}"
+    # r = requests.get(url_raw_commit)
+    # r.raise_for_status()
+    # data = r.json()
 
     # Find the ISS row 
     iss_row = next(row for row in data if row.get("NORAD_CAT_ID") == 25544)

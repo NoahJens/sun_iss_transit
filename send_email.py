@@ -1,21 +1,24 @@
+import smtplib
+import os
+import requests
+
 from skyfield.api import wgs84, load, EarthSatellite
 from transit import find_transit 
 from datetime import datetime
-
-import smtplib
 from email.mime.text import MIMEText
 from email.mime.multipart import MIMEMultipart
 from email.mime.base import MIMEBase
 from email import encoders
-import os
-import requests
 from utils import convert_t
 
+# Load Skyfield timescale 
 ts = load.timescale()
 
+# Load data for earth and sun from Skyfield bsp file 
 planets = load('de421.bsp')
 earth, sun = planets['earth'], planets['sun']
 
+# Load repo data
 owner = "NoahJens"
 repo = "sun_iss_transit"
 file_path = "ISS.csv"
