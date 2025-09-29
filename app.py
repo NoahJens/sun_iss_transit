@@ -9,7 +9,7 @@ st.title("Sun - ISS Transit Calculator")
 
 # Initial load of ISS data and storage into session state, without fetching new orbit data from Celestrak (override = False) 
 if "iss" not in st.session_state or "epoch" not in st.session_state:
-    st.session_state.iss, st.session_state.epoch = load_iss_data(override = False)
+    st.session_state.iss, st.session_state.epoch = load_iss_data(override = True)
 
 st.write(f'ISS orbit data from {st.session_state.epoch}')
 
