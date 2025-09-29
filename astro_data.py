@@ -15,7 +15,7 @@ earth, sun = planets['earth'], planets['sun']
 # Allow new download of ISS orbit data from Celestrak every max_days  
 max_days = .1  
 
-def load_iss_data(override):
+def load_iss_data():
     success = None # Variable for determining, if workflow successfully finished
 
     try:
@@ -32,42 +32,42 @@ def load_iss_data(override):
         params = {"branch": "main", "per_page": 1}
 
         # Check time of last workflow run, when override is engaged 
-        if override:          
-            r = requests.get(url_runs, headers=headers, params=params)
-            r.raise_for_status()
-            runs = r.json().get("workflow_runs", [])
-            
-            age_days = None # Variable to store how long last workflow is in the past
-            success = False 
+               
+        r = requests.get(url_runs, headers=headers, params=params)
+        r.raise_for_status()
+        runs = r.json().get("workflow_runs", [])
+        
+        age_days = None # Variable to store how long last workflow is in the past
+        success = False 
 
-            # Calculate elapsed time since last workflow and store in age_days
-            if runs:
-                last_run = runs[0]
-                completed_at = last_run.get("updated_at") or last_run.get("created_at")
-                completed_dt = datetime.fromisoformat(completed_at.replace("Z", "+00:00"))
-                age_days = (datetime.now(timezone.utc) - completed_dt).total_seconds() / 86400
+        # Calculate elapsed time since last workflow and store in age_days
+        if runs:
+            last_run = runs[0]
+            completed_at = last_run.get("updated_at") or last_run.get("created_at")
+            completed_dt = datetime.fromisoformat(completed_at.replace("Z", "+00:00"))
+            age_days = (datetime.now(timezone.utc) - completed_dt).total_seconds() / 86400
 
-            # Trigger workflow if no run exists or last run is too old
-            if not runs or age_days >= max_days:
-                status_placeholder = st.empty()
-                status_placeholder.markdown(
-                    "<span style='color:red'>Updating ISS orbit data... please wait</span>",
-                    unsafe_allow_html=True
-                )
-                repo_state_before = requests.get(f"https://api.github.com/repos/{owner}/{repo}/commits/main", 
-                                                 headers=headers).json()["sha"]
-                
-                success = trigger_orbit_update(workflow_file) # trigger workflow for updating ISS orbit data
-
-                repo_state_after = requests.get(f"https://api.github.com/repos/{owner}/{repo}/commits/main", 
+        # Trigger workflow if no run exists or last run is too old
+        if not runs or age_days >= max_days:
+            status_placeholder = st.empty()
+            status_placeholder.markdown(
+                "<span style='color:red'>Updating ISS orbit data... please wait</span>",
+                unsafe_allow_html=True
+            )
+            repo_state_before = requests.get(f"https://api.github.com/repos/{owner}/{repo}/commits/main", 
                                                 headers=headers).json()["sha"]
-                
-                if not success:
-                    st.error("⚠️ Could not trigger ISS orbit data update workflow or workflow failed")
-                    status_placeholder.empty()
-                    return 
-                
+            
+            success = trigger_orbit_update(workflow_file) # trigger workflow for updating ISS orbit data
+
+            repo_state_after = requests.get(f"https://api.github.com/repos/{owner}/{repo}/commits/main", 
+                                            headers=headers).json()["sha"]
+            
+            if not success:
+                st.error("⚠️ Could not trigger ISS orbit data update workflow or workflow failed")
                 status_placeholder.empty()
+                return 
+            
+            status_placeholder.empty()
 
     except (HTTPError, URLError, OSError) as e:
         st.error(f"⚠️ Could not update ISS orbit data ({e})")

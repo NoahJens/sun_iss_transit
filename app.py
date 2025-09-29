@@ -7,16 +7,15 @@ from utils import decimal_places
 
 st.title("Sun - ISS Transit Calculator")
 
-# Initial load of ISS data and storage into session state, without fetching new orbit data from Celestrak (override = False) 
+# Initial load of ISS data and storage into session state
 if "iss" not in st.session_state or "epoch" not in st.session_state:
-    st.session_state.iss, st.session_state.epoch = load_iss_data(override = True)
+    st.session_state.iss, st.session_state.epoch = load_iss_data()
 
 st.write(f'ISS orbit data from {st.session_state.epoch}')
 
 # Refreshing orbit data of ISS
 if st.button("Update ISS orbit data"):
-    override = True # Forces check, if ISS orbit data is recent and updtes accordingly 
-    st.session_state.iss, st.session_state.epoch = load_iss_data(override)
+    st.session_state.iss, st.session_state.epoch = load_iss_data()
     
 st.text('Apparent diameter of sun approx. 0.5 degrees')
 
