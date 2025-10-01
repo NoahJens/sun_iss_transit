@@ -149,13 +149,13 @@ def load_iss_data():
 
     # Load last commit of repo (new CSV file was automatically committed by workflow)
     url_commit = f"https://api.github.com/repos/{owner}/{repo}/commits?path={file_path}&sha={branch}"
-    r = requests.get(url_commit)
+    r = requests.get(url_commit, headers=headers)
     r.raise_for_status()
     latest_commit_sha = r.json()[0]["sha"]
 
     # Fetch CSV at that commit
     url_raw_commit = f"https://raw.githubusercontent.com/{owner}/{repo}/{latest_commit_sha}/{file_path}"
-    r = requests.get(url_raw_commit)
+    r = requests.get(url_raw_commit, headers=headers)
     r.raise_for_status()
     data = r.json()
 
