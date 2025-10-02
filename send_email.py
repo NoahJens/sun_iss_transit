@@ -64,26 +64,27 @@ recipients = os.environ["EMAIL_TO"].split(",")  # EMAIL_TO="first@example.com,se
 filename = "transits.csv"
 email_filename = f"transits_{datetime.now().strftime('%Y%m%d')}.csv"
 
-for recipient in recipients:
-    msg = MIMEMultipart()
-    msg["From"] = os.environ["EMAIL_FROM"]
-    msg["To"] = recipient.strip()  # remove spaces
-    msg["Subject"] = "Sun ISS transits"
+# for recipient in recipients:
+msg = MIMEMultipart()
+msg["From"] = os.environ["EMAIL_FROM"]
+# msg["To"] = recipient.strip()  # remove spaces
+msg["To"] = os.environ["EMAIL_TO"]
+msg["Subject"] = "Sun ISS transits"
 
-    msg.attach(MIMEText("Please find the CSV attached with a 7 day forecast", "plain"))
+msg.attach(MIMEText("Please find the CSV attached with a 7 day forecast", "plain"))
 
-    with open(filename, "rb") as f:
-        part = MIMEBase("application", "octet-stream")
-        part.set_payload(f.read())
-    encoders.encode_base64(part)
-    part.add_header("Content-Disposition", f"attachment; filename={email_filename}")
-    msg.attach(part)
+with open(filename, "rb") as f:
+    part = MIMEBase("application", "octet-stream")
+    part.set_payload(f.read())
+encoders.encode_base64(part)
+part.add_header("Content-Disposition", f"attachment; filename={email_filename}")
+msg.attach(part)
 
 
-    # Connect using SSL on port 465
-    with smtplib.SMTP_SSL("smtp.web.de", 465) as server:
-        server.login(os.environ["EMAIL_FROM"], os.environ['EMAIL_PASSWORD'])
-        server.sendmail(os.environ['EMAIL_FROM'], os.environ['EMAIL_TO'], msg.as_string())
+# Connect using SSL on port 465
+with smtplib.SMTP_SSL("smtp.web.de", 465) as server:
+    server.login(os.environ["EMAIL_FROM"], os.environ['EMAIL_PASSWORD'])
+    server.sendmail(os.environ['EMAIL_FROM'], os.environ['EMAIL_TO'], msg.as_string())
 
 # else:
     # print("No transit events — email not sent")
