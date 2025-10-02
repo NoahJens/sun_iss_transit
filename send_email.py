@@ -1,6 +1,7 @@
 import smtplib
 import os
 import requests
+import base64
 
 from skyfield.api import wgs84, load, EarthSatellite
 from transit import find_transit 
@@ -10,6 +11,44 @@ from email.mime.multipart import MIMEMultipart
 from email.mime.base import MIMEBase
 from email import encoders
 from utils import convert_t
+from sendgrid import SendGridAPIClient
+from sendgrid.helpers.mail import Mail, Attachment, FileContent, FileName, FileType, Disposition
+
+
+# Email part
+def send_email(filename="transits.csv"):
+    # Prepare file
+    with open(filename, "rb") as f:
+        data = f.read()
+    encoded_file = base64.b64encode(data).decode()
+    email_filename = f"transits_{datetime.now().strftime('%Y%m%d')}.csv"
+
+    # Attachment
+    attachment = Attachment(
+        FileContent(encoded_file),
+        FileName(email_filename),
+        FileType("text/csv"),
+        Disposition("attachment")
+    )
+
+    recipients = [r.strip() for r in os.environ["EMAIL_TO"].split(",")] # EMAIL_TO="first@example.com,second@example.com"
+
+    sg = SendGridAPIClient(os.environ["SENDGRID_API_KEY"])
+
+    for recipient in recipients:
+        message = Mail(
+            from_email=os.environ["EMAIL_FROM"],
+            to_emails=recipient,
+            subject="Sun ISS transits",
+            html_content="Please find the CSV attached with a 7 day forecast"
+        )
+        message.attachment = attachment
+        try:
+            response = sg.send(message)
+            print(f"✅ Email sent to {recipient} — Status {response.status_code}")
+        except Exception as e:
+            print(f"⚠️ Error sending to {recipient}: {e}")
+
 
 # Load Skyfield timescale 
 ts = load.timescale()
@@ -23,7 +62,7 @@ owner = "NoahJens"
 repo = "sun_iss_transit"
 branch = "main"
 file_path = "ISS.csv"
-headers = {}
+
 if "GITHUB_TOKEN" in os.environ:
     headers = {"Authorization": f"token {os.environ['GITHUB_TOKEN']}"}
 
@@ -54,33 +93,8 @@ transit = find_transit(observer, sun, iss)
 transit["Orbit data timestamp"] = epoch
 transit.to_csv("transits.csv", index=False, float_format="%.2f")
 
-# Allow multiple recipients via secrets
-recipients = os.environ["EMAIL_TO"].split(",")  # EMAIL_TO="first@example.com,second@example.com"
-
-if not transit.empty: 
-    filename = "transits.csv"
-    email_filename = f"transits_{datetime.now().strftime('%Y%m%d')}.csv"
-
-    for recipient in recipients:
-        msg = MIMEMultipart()
-        msg["From"] = os.environ["EMAIL_FROM"]
-        msg["To"] = recipient.strip()  # remove spaces
-        msg["Subject"] = "Sun ISS transits"
-
-        msg.attach(MIMEText("Please find the CSV attached with a 7 day forecast", "plain"))
-
-        with open(filename, "rb") as f:
-            part = MIMEBase("application", "octet-stream")
-            part.set_payload(f.read())
-        encoders.encode_base64(part)
-        part.add_header("Content-Disposition", f"attachment; filename={email_filename}")
-        msg.attach(part)
-
-        # Send
-        with smtplib.SMTP_SSL("smtp.gmail.com", 465) as server:
-            server.login(os.environ["EMAIL_FROM"], os.environ["EMAIL_PASSWORD"])
-            server.send_message(msg)
-
+if not transit.empty:
+    send_email("transits.csv")
 else:
     print("No transit events — email not sent")
 
