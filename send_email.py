@@ -2,13 +2,13 @@ import smtplib
 import os
 import requests
 
+from sendgrid import SendGridAPIClient
+from sendgrid.helpers.mail import Mail, Attachment, FileContent, FileName, FileType, Disposition
+from base64 import b64encode
+from datetime import datetime
 from skyfield.api import wgs84, load, EarthSatellite
 from transit import find_transit 
 from datetime import datetime
-from email.mime.text import MIMEText
-from email.mime.multipart import MIMEMultipart
-from email.mime.base import MIMEBase
-from email import encoders
 from utils import convert_t
 
 # Load Skyfield timescale 
@@ -58,34 +58,44 @@ transit["Orbit data timestamp"] = epoch
 transit.to_csv("transits.csv", index=False, float_format="%.2f")
 
 # Allow multiple recipients via secrets
-# recipients = os.environ["EMAIL_TO"].split(",")  # EMAIL_TO="first@example.com,second@example.com"
+recipients = os.environ["EMAIL_TO"].split(",")  # EMAIL_TO="first@example.com,second@example.com"
 
 # if not transit.empty: 
 filename = "transits.csv"
 email_filename = f"transits_{datetime.now().strftime('%Y%m%d')}.csv"
+subject = "Sun ISS transits"
+content_text = "Please find the CSV attached with a 7 day forecast"
 
-# for recipient in recipients:
-msg = MIMEMultipart()
-msg["From"] = os.environ["EMAIL_FROM"]
-msg["To"] = os.environ["EMAIL_TO"] # recipient.strip()  # remove spaces
-msg["Subject"] = "Sun ISS transits"
-
-msg.attach(MIMEText("Please find the CSV attached with a 7 day forecast", "plain"))
-
+# Read file and encode for SendGrid attachment
 with open(filename, "rb") as f:
-    part = MIMEBase("application", "octet-stream")
-    part.set_payload(f.read())
-encoders.encode_base64(part)
-part.add_header("Content-Disposition", f"attachment; filename={email_filename}")
-msg.attach(part)
+    file_data = f.read()
+encoded_file = b64encode(file_data).decode()
 
-# Send via web.de
-with smtplib.SMTP("smtp.web.de", 587) as server:   # use TLS on port 587
-    server.starttls()
-    server.login(os.environ["EMAIL_FROM"], os.environ["EMAIL_PASSWORD"])
-    server.send_message(msg)
+attachment = Attachment(
+    FileContent(encoded_file),
+    FileName(email_filename),
+    FileType("application/octet-stream"),
+    Disposition("attachment")
+)
 
-# else:
-    # print("No transit events — email not sent")
+# Loop over recipients
+for recipient in recipients:
+    message = Mail(
+        from_email=os.environ["EMAIL_FROM"],
+        to_emails=recipient,
+        subject=subject,
+        plain_text_content=content_text
+    )
+    message.attachment = attachment
+
+    try:
+        sg = SendGridAPIClient(os.environ["SENDGRID_API_KEY"])
+        response = sg.send(message)
+        print(f"Email sent to {recipient}, status code: {response.status_code}")
+    except Exception as e:
+        print(f"Failed to send email to {recipient}: {e}")
+    
+    # else:
+        # print("No transit events — email not sent")
 
 
