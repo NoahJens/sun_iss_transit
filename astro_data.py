@@ -91,6 +91,7 @@ def load_iss_data():
     """
 
     success = None # Variable for determining, if workflow successfully finished
+    status_placeholder = st.empty()
 
     try:
         # Define data for fetching ISS orbit data CSV file from repo 
@@ -170,10 +171,10 @@ def load_iss_data():
 
     # Print info messages, if ISS orbit data has been updated 
     if success == False: 
-        st.info("Orbit data is up to date")
+        status_placeholder.info("Orbit data is up to date")
     elif success == True: 
         if repo_state_before == repo_state_after: 
-            st.info("No new orbit data available")
+            status_placeholder.info("No new orbit data available")
         else:
-            st.success(f"Orbit data has been updated (epoch: {epoch})")
+            status_placeholder.success(f"Orbit data has been updated (epoch: {epoch})")
     return iss, epoch
