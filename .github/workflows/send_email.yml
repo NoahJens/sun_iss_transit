@@ -10,6 +10,8 @@ permissions:
 jobs:
   send_email:
     runs-on: ubuntu-latest
+    env:
+      GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}   # expose secret as env var
       
     steps:
       - name: Set up Python

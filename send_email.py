@@ -26,6 +26,9 @@ file_path = "ISS.csv"
 
 if "GITHUB_TOKEN" in os.environ:
     headers = {"Authorization": f"token {os.environ['GITHUB_TOKEN']}"}
+    print('PAT accessed')
+else:
+    headers = {}
 
 # Load last commit of repo (new CSV file was automatically committed by workflow)
 url_commit = f"https://api.github.com/repos/{owner}/{repo}/commits?path={file_path}&sha={branch}"
