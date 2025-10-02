@@ -79,11 +79,11 @@ for recipient in recipients:
     part.add_header("Content-Disposition", f"attachment; filename={email_filename}")
     msg.attach(part)
 
-    # Send via web.de
-    with smtplib.SMTP("smtp.web.de", 587) as server:   # use TLS on port 587
-        server.starttls()
-        server.login(os.environ["EMAIL_FROM"], os.environ["EMAIL_PASSWORD"])
-        server.send_message(msg)
+
+    # Connect using SSL on port 465
+    with smtplib.SMTP_SSL("smtp.web.de", 465) as server:
+        server.login(os.environ["EMAIL_FROM"], os.environ['EMAIL_PASSWORD'])
+        server.sendmail(os.environ['EMAIL_FROM'], os.environ['EMAIL_TO'], msg.as_string())
 
 # else:
     # print("No transit events — email not sent")
