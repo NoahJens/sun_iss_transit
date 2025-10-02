@@ -57,8 +57,8 @@ def find_transit(observer, sun, iss):
     # ---------------------------------------------------------
 
     days_to_scan = 7 # Coarse scan 7 days ahead
-    coarse_threshold_deg = 10 # Save instances with angular seperation of less than 10 degree
-    minutes_per_step = 4 # Check angular seperation in coarse scan every 4 minutes
+    coarse_threshold_deg = 15 # Save instances with angular seperation of less than 15 degree
+    minutes_per_step = 1 # Check angular seperation in coarse scan every minute
     
     candidate_times = [] 
 
@@ -80,14 +80,14 @@ def find_transit(observer, sun, iss):
             separation, sun_alt = angular_separation(t, observer, sun, iss)
 
             # Append time to candidates, when separation is less than 10 degrees and the sun is 10 degrees above the horizon
-            if separation <= coarse_threshold_deg and sun_alt > 10:
+            if separation <= coarse_threshold_deg and sun_alt > 5:
                 candidate_times.append(t)
-
+    
     # ---------------------------------------------------------
     # FINE CHECK 
     # ---------------------------------------------------------
 
-    window_minutes = 2 # Check two minutes in past and 2 in future from coarse candidate (covers the 4 minutes of the coarse scan)
+    window_minutes = 0.5 # Check half a minutes in past and half a minute in future from coarse candidate (covers the 1 minutes of the coarse scan)
     offset_minutes= window_minutes / (24 * 60)
     fine_threshold_deg = 2 # 2 degrees angular seperation as threshold for fine scan
 
@@ -111,8 +111,35 @@ def find_transit(observer, sun, iss):
         # Append only the time with the minimum separation to the records
         if pairs:
             best_time, min_sep, min_alt = min(pairs, key=lambda x: x[1])
-            records.append((convert_t(best_time), min_sep, min_alt))
- 
-    # Write the pair with the smallest angular separation of each candidate to a df (if separation is under 2 degree) 
-    df = pd.DataFrame(records, columns=["Time CEST", "Separation [deg]", "Sun altitude [deg]"])
+            records.append((best_time, min_sep, min_alt))
+    
+    # ---------------------------------------------------------
+    # REMOVE DUPLICATES 
+    # ---------------------------------------------------------
+    cleaned_records = []
+
+    records.sort(key=lambda x: x[0])  # sort by Skyfield Time
+
+    for rec in records:
+        rec_time = rec[0]  # keep as Skyfield Time for comparison
+        rec_sep = rec[1]
+        rec_alt = rec[2]
+
+        if not cleaned_records:
+            cleaned_records.append((rec_time, rec_sep, rec_alt))
+        else:
+            last_time = cleaned_records[-1][0]
+            # If within 15 seconds, keep the one with smaller separation
+            delta_sec = (rec_time.tt - last_time.tt) * 86400  # tt is in days, 86400 sec/day
+            if delta_sec < 15:
+                if rec_sep < cleaned_records[-1][1]:
+                    cleaned_records[-1] = (rec_time, rec_sep, rec_alt)
+            else:
+                cleaned_records.append((rec_time, rec_sep, rec_alt))
+
+    # Convert times to desired format using convert_t() when creating the DataFrame 
+    df = pd.DataFrame(
+        [(convert_t(t), sep, alt) for t, sep, alt in cleaned_records],
+        columns=["Time CEST", "Separation [deg]", "Sun altitude [deg]"]
+    )
     return df
