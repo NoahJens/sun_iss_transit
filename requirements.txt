@@ -9,4 +9,4 @@ pip==25.2
 pytz==2025.2
 skyfield==1.53
 streamlit==1.49.1
-sendgrig==6.7.1
+sendgrid
