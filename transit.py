@@ -80,7 +80,7 @@ def find_transit(observer, sun, iss):
             separation, sun_alt = angular_separation(t, observer, sun, iss)
 
             # Append time to candidates, when separation is less than 10 degrees and the sun is 10 degrees above the horizon
-            if separation <= coarse_threshold_deg and sun_alt > 5:
+            if separation <= coarse_threshold_deg and sun_alt > 10:
                 candidate_times.append(t)
     
     # ---------------------------------------------------------

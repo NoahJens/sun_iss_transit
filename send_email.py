@@ -91,9 +91,9 @@ for recipient in recipients:
     try:
         sg = SendGridAPIClient(os.environ["SENDGRID_API_KEY"])
         response = sg.send(message)
-        print(f"Email sent to {recipient}, status code: {response.status_code}")
+        print(f"Email sent, status code: {response.status_code}")
     except Exception as e:
-        print(f"Failed to send email to {recipient}: {e}")
+        print(f"Failed to send email: {e}")
     
     # else:
         # print("No transit events — email not sent")
