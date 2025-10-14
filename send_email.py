@@ -1,15 +1,73 @@
-import smtplib
 import os
+import base64
 import requests
 
-from sendgrid import SendGridAPIClient
-from sendgrid.helpers.mail import Mail, Attachment, FileContent, FileName, FileType, Disposition
-from base64 import b64encode
+from email.mime.text import MIMEText
+from email.mime.multipart import MIMEMultipart
+from email.mime.application import MIMEApplication
+from google.oauth2.credentials import Credentials
+from google_auth_oauthlib.flow import InstalledAppFlow
+from google.auth.transport.requests import Request
+from googleapiclient.discovery import build
+
 from datetime import datetime
 from skyfield.api import wgs84, load, EarthSatellite
 from transit import find_transit 
 from datetime import datetime
 from utils import convert_t
+
+SCOPES = ["https://www.googleapis.com/auth/gmail.send"]
+
+def get_gmail_service():
+    """Authenticate with Gmail API using credentials stored as a GitHub secret."""
+    creds = None
+
+    # Decode the credentials JSON from GitHub secret (base64 string)
+    credentials_json_bytes = base64.b64decode(os.environ["GMAIL_CREDENTIALS"])
+    
+    # Write to a temporary in-memory file using NamedTemporaryFile if needed
+    with open("credentials.json", "wb") as f:
+        f.write(credentials_json_bytes)
+
+    # Load token if exists (optional, can skip if doing OAuth every time)
+    if os.path.exists("token.json"):
+        creds = Credentials.from_authorized_user_file("token.json", SCOPES)
+
+    # Run OAuth flow if necessary
+    if not creds or not creds.valid:
+        if creds and creds.expired and creds.refresh_token:
+            creds.refresh(Request())
+        else:
+            flow = InstalledAppFlow.from_client_secrets_file("credentials.json", SCOPES)
+            creds = flow.run_local_server(port=0)
+        # Save token for next runs
+        with open("token.json", "w") as token_file:
+            token_file.write(creds.to_json())
+
+    service = build("gmail", "v1", credentials=creds)
+    return service
+
+def send_email_with_attachment(service, sender, recipient, subject, body_text, attachment_path, attachment_filename):
+    """Send an email with an attachment via Gmail API."""
+    message = MIMEMultipart()
+    message["From"] = sender
+    message["To"] = recipient
+    message["Subject"] = subject
+
+    # Body text
+    message.attach(MIMEText(body_text, "plain"))
+
+    # Attachment
+    with open(attachment_path, "rb") as f:
+        part = MIMEApplication(f.read(), Name=attachment_filename)
+    part['Content-Disposition'] = f'attachment; filename="{attachment_filename}"'
+    message.attach(part)
+
+    # Encode and send
+    raw_message = base64.urlsafe_b64encode(message.as_bytes()).decode()
+    body = {"raw": raw_message}
+    sent = service.users().messages().send(userId="me", body=body).execute()
+    print(f"Email sent to {recipient}, Message ID: {sent['id']}")
 
 # Load Skyfield timescale 
 ts = load.timescale()
@@ -61,40 +119,18 @@ transit.to_csv("transits.csv", index=False, float_format="%.2f")
 recipients = os.environ["EMAIL_TO"].split(",")  # EMAIL_TO="first@example.com,second@example.com"
 
 # if not transit.empty: 
-filename = "transits.csv"
-email_filename = f"transits_{datetime.now().strftime('%Y%m%d')}.csv"
+service = get_gmail_service()
+recipients = os.environ["EMAIL_TO"].split(",")
+sender = os.environ["EMAIL_FROM"]
 subject = "Sun ISS transits"
-content_text = "Please find the CSV attached with a 7 day forecast"
+body_text = "Please find the CSV attached with a 7 day forecast"
 
-# Read file and encode for SendGrid attachment
-with open(filename, "rb") as f:
-    file_data = f.read()
-encoded_file = b64encode(file_data).decode()
+# File created by your previous code
+filename = "transits.csv"
+attachment_filename = f"transits_{datetime.now().strftime('%Y%m%d')}.csv"
 
-attachment = Attachment(
-    FileContent(encoded_file),
-    FileName(email_filename),
-    FileType("application/octet-stream"),
-    Disposition("attachment")
-)
-
-# Loop over recipients
 for recipient in recipients:
-    message = Mail(
-        from_email=os.environ["EMAIL_FROM"],
-        to_emails=recipient,
-        subject=subject,
-        plain_text_content=content_text
-    )
-    message.attachment = attachment
-
-    try:
-        sg = SendGridAPIClient(os.environ["SENDGRID_API_KEY"])
-        response = sg.send(message)
-        print(f"Email sent, status code: {response.status_code}")
-    except Exception as e:
-        print(f"Failed to send email: {e}")
-    
+    send_email_with_attachment(service, sender, recipient, subject, body_text, filename, attachment_filename)
     # else:
         # print("No transit events — email not sent")
 
