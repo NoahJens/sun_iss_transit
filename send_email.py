@@ -19,30 +19,32 @@ from utils import convert_t
 SCOPES = ["https://www.googleapis.com/auth/gmail.send"]
 
 def get_gmail_service():
-    """Authenticate with Gmail API using credentials stored as a GitHub secret."""
-    creds = None
+    import json
+    from google.auth.transport.requests import Request
+    from google.oauth2.credentials import Credentials
+    from googleapiclient.discovery import build
+    import base64, os
 
-    # Decode the credentials JSON from GitHub secret (base64 string)
-    credentials_json_bytes = base64.b64decode(os.environ["GMAIL_CREDENTIALS"])
-    
-    # Write to a temporary in-memory file using NamedTemporaryFile if needed
+    SCOPES = ["https://www.googleapis.com/auth/gmail.send"]
+
+    # Decode credentials.json
+    creds_bytes = base64.b64decode(os.environ["GMAIL_CREDENTIALS"])
     with open("credentials.json", "wb") as f:
-        f.write(credentials_json_bytes)
+        f.write(creds_bytes)
 
-    # Load token if exists (optional, can skip if doing OAuth every time)
-    if os.path.exists("token.json"):
-        creds = Credentials.from_authorized_user_file("token.json", SCOPES)
+    # Decode token.json
+    token_bytes = base64.b64decode(os.environ["GMAIL_TOKEN"])
+    with open("token.json", "wb") as f:
+        f.write(token_bytes)
 
-    # Run OAuth flow if necessary
-    if not creds or not creds.valid:
-        if creds and creds.expired and creds.refresh_token:
-            creds.refresh(Request())
-        else:
-            flow = InstalledAppFlow.from_client_secrets_file("credentials.json", SCOPES)
-            creds = flow.run_local_server(port=0)
-        # Save token for next runs
-        with open("token.json", "w") as token_file:
-            token_file.write(creds.to_json())
+    # Load credentials
+    creds = Credentials.from_authorized_user_file("token.json", SCOPES)
+
+    # Refresh if expired
+    if creds.expired and creds.refresh_token:
+        creds.refresh(Request())
+        with open("token.json", "w") as f:
+            f.write(creds.to_json())
 
     service = build("gmail", "v1", credentials=creds)
     return service
