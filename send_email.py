@@ -118,22 +118,23 @@ transit["Orbit data timestamp"] = epoch
 transit.to_csv("transits.csv", index=False, float_format="%.2f")
 
 # Allow multiple recipients via secrets
-recipients = [r.strip() for r in os.environ["EMAIL_TO"].split(",") if r.strip()] # EMAIL_TO="first@example.com,second@example.com"
+recipients = [r.strip() for r in os.environ["EMAIL_TO"].split(",") if r.strip()] # secret formatting: first@example.com,second@example.com
 
-# if not transit.empty: 
-service = get_gmail_service()
-recipients = os.environ["EMAIL_TO"].split(",")
-sender = os.environ["EMAIL_FROM"]
-subject = "Sun ISS transits"
-body_text = "Please find the CSV attached with a 7 day forecast"
+if not transit.empty: 
+    service = get_gmail_service()
+    recipients = os.environ["EMAIL_TO"].split(",")
+    sender = os.environ["EMAIL_FROM"]
+    subject = "Sun ISS transits"
+    body_text = "Please find the CSV attached with a 7 day forecast"
 
-# File created by your previous code
-filename = "transits.csv"
-attachment_filename = f"transits_{datetime.now().strftime('%Y%m%d')}.csv"
+    # File created by your previous code
+    filename = "transits.csv"
+    attachment_filename = f"transits_{datetime.now().strftime('%Y%m%d')}.csv"
 
-for recipient in recipients:
-    send_email_with_attachment(service, sender, recipient, subject, body_text, filename, attachment_filename)
-    # else:
-        # print("No transit events — email not sent")
+    for recipient in recipients:
+        send_email_with_attachment(service, sender, recipient, subject, body_text, filename, attachment_filename)
+   
+else:
+    print("No transit events — email not sent")
 
 
