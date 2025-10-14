@@ -118,7 +118,7 @@ transit["Orbit data timestamp"] = epoch
 transit.to_csv("transits.csv", index=False, float_format="%.2f")
 
 # Allow multiple recipients via secrets
-recipients = os.environ["EMAIL_TO"].split(",")  # EMAIL_TO="first@example.com,second@example.com"
+recipients = [r.strip() for r in os.environ["EMAIL_TO"].split(",") if r.strip()] # EMAIL_TO="first@example.com,second@example.com"
 
 # if not transit.empty: 
 service = get_gmail_service()
