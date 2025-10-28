@@ -117,12 +117,9 @@ transit = find_transit(observer, sun, iss)
 transit["Orbit data timestamp"] = epoch
 transit.to_csv("transits.csv", index=False, float_format="%.2f")
 
-# Allow multiple recipients via secrets
-recipients = [r.strip() for r in os.environ["EMAIL_TO"].split(",") if r.strip()] # secret formatting: first@example.com,second@example.com
-
 if not transit.empty: 
     service = get_gmail_service()
-    recipients = os.environ["EMAIL_TO"].split(",")
+    recipients = os.environ["EMAIL_TO"].split(",") # secret formatting: first@example.com,second@example.com
     sender = os.environ["EMAIL_FROM"]
     subject = "Sun ISS transits"
     body_text = "Please find the CSV attached with a 7 day forecast"
